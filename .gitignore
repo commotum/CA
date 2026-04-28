@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Generated source material
+/A New Kind of Science/
