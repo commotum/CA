@@ -199,3 +199,126 @@ Episode = generated trajectory
 ```
 
 CA should produce worlds as trajectories. PE should turn those trajectories into model food.
+
+## uv Project Structure
+
+CA should be a package-first, tool-friendly `uv` project.
+
+That means CA is primarily an importable Python library, but it also exposes a CLI through `project.scripts`, so users can run it as a command-line tool.
+
+Recommended layout:
+
+```text
+CA/
+  pyproject.toml
+  uv.lock
+  README.md
+  repo-plan.md
+  generator.md
+  V2.md
+
+  specs/
+    monster_v1_1.toml
+    elementary_1d.toml
+    semi_totalistic_shell.toml
+
+  src/
+    ca/
+      __init__.py
+      spec.py
+      episodes.py
+      generators.py
+      coordinates.py
+      neighborhoods.py
+      frontiers.py
+      rules.py
+      seeds.py
+      boundaries.py
+      registry.py
+      builder.py
+      presets.py
+      io.py
+      cli.py
+
+      catalog/
+        __init__.py
+        neighborhoods.py
+        frontiers.py
+        rules.py
+        seeds.py
+        boundaries.py
+
+  tests/
+    test_generators.py
+    test_rules.py
+    test_presets.py
+```
+
+Recommended `pyproject.toml` shape:
+
+```toml
+[project]
+name = "simple-programs-ca"
+version = "0.1.0"
+description = "A research library for simple programs and cellular automata trajectory generation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "pydantic>=2",
+  "typer>=0.12",
+  "rich>=13",
+]
+
+[project.scripts]
+ca = "ca.cli:app"
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.0,<0.9.0"]
+build-backend = "uv_build"
+```
+
+Optional extras should stay narrow:
+
+```toml
+[project.optional-dependencies]
+viz = ["matplotlib>=3.8", "pillow>=10"]
+```
+
+Do not put `torch` in core CA unless CA itself truly needs it. Transformer serialization, datasets, collate functions, CUDA tensors, and MonSTER / RoPE preparation belong in `pe`.
+
+Expected workflows:
+
+```bash
+uv sync --dev
+uv run pytest
+uv run ca list catalog
+uv run ca preset validate specs/monster_v1_1.toml
+uv run ca generate --preset specs/monster_v1_1.toml --count 100 --out episodes/
+uv build
+```
+
+For PE to consume CA locally:
+
+```toml
+[tool.uv.sources]
+simple-programs-ca = { path = "../CA", editable = true }
+```
+
+Short version:
+
+```text
+CA = uv package + CLI tool
+src/ca = importable library
+ca.cli = command-line interface
+catalog = built-in defaults
+presets/specs = saved assembled systems
+generator = turns presets into episodes
+PE = turns episodes into transformer batches
+```
