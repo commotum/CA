@@ -7,10 +7,12 @@ This document is the normalized target layout for the ankos repo:
 ## Naming Rules
 
 - Use `ankos` as the repo-root name in tree views.
-- Use `ca` only for the CA Python import package.
+- Use `ca` only for the Python import package.
 - Use `README.md` for the repo root.
-- Use lowercase hyphen slugs for reference docs: `ca-types.md`, `repo-plan.md`.
 - Keep reference material under the top-level `ref` directory.
+- Keep research notes under `ref/notes`.
+- Keep archived planning docs under `ref/notes/archived`.
+- Keep uv reference docs under `ref/uv-docs`.
 - Keep the NKS source as `ref/A-New-Kind-of-Science`.
   Preserve its `FRONT-MATTER`, `CHAPTERS`, and `BACK-MATTER` layout.
 
@@ -54,11 +56,14 @@ ankos
 ```text
 ankos
 └── ref
-    ├── ca-types.csv
-    ├── ca-types.md
-    ├── generator.md
-    ├── v2.md
-    ├── repo-plan.md
+    ├── notes
+    │   ├── CA-Types.csv
+    │   ├── CA-Types.md
+    │   ├── generator.md
+    │   └── archived
+    │       ├── V2.md
+    │       ├── generator.md
+    │       └── repo-plan.md
     ├── uv-docs
     └── A-New-Kind-of-Science
         ├── FRONT-MATTER
@@ -84,11 +89,14 @@ ankos
 ```text
 ankos
 ├── ref
-│   ├── ca-types.csv
-│   ├── ca-types.md
-│   ├── generator.md
-│   ├── v2.md
-│   ├── repo-plan.md
+│   ├── notes
+│   │   ├── CA-Types.csv
+│   │   ├── CA-Types.md
+│   │   ├── generator.md
+│   │   └── archived
+│   │       ├── V2.md
+│   │       ├── generator.md
+│   │       └── repo-plan.md
 │   ├── uv-docs
 │   └── A-New-Kind-of-Science
 │       ├── FRONT-MATTER
