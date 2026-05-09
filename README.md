@@ -1,27 +1,28 @@
 # Refactor Target
 
-This document is the normalized target layout for the CA repo:
+This document is the normalized target layout for the ankos repo:
 
-- `CA`: standalone cellular-automata library and research notes.
+- `ankos`: standalone cellular-automata library and research references.
 
 ## Naming Rules
 
-- Use `CA` as the repo-root name in tree views.
-- Use `ca_lattice` only for the CA Python import package.
+- Use `ankos` as the repo-root name in tree views.
+- Use `ca` only for the CA Python import package.
 - Use `README.md` for the repo root.
-- Use lowercase hyphen slugs for notes: `ca-types.md`, `repo-plan.md`.
-- Keep the NKS source as a top-level `A-New-Kind-of-Science` directory.
+- Use lowercase hyphen slugs for reference docs: `ca-types.md`, `repo-plan.md`.
+- Keep reference material under the top-level `ref` directory.
+- Keep the NKS source as `ref/A-New-Kind-of-Science`.
   Preserve its `FRONT-MATTER`, `CHAPTERS`, and `BACK-MATTER` layout.
 
-## CA
+## ankos
 
 ### High-Level View
 
 ```text
-CA
-├── A-New-Kind-of-Science
-├── ca_lattice
-├── notes
+ankos
+├── src
+│   └── ca
+├── ref
 ├── tests
 ├── pyproject.toml
 ├── uv.lock
@@ -31,42 +32,45 @@ CA
 ### Package View
 
 ```text
-CA
-└── ca_lattice
-    ├── __init__.py
-    ├── specs.py
-    ├── loci.py
-    ├── alphabets.py
-    ├── neighborhoods.py
-    ├── frontiers.py
-    ├── seeds.py
-    ├── rules.py
-    ├── boundary.py
-    ├── rng.py
-    └── rollout.py
+ankos
+└── src
+    └── ca
+        ├── __init__.py
+        ├── py.typed
+        ├── specs.py
+        ├── loci.py
+        ├── alphabets.py
+        ├── neighborhoods.py
+        ├── frontiers.py
+        ├── seeds.py
+        ├── rules.py
+        ├── boundary.py
+        ├── rng.py
+        └── rollout.py
 ```
 
-### Notes And Book View
+### Ref View
 
 ```text
-CA
-├── notes
-│   ├── ca-types.csv
-│   ├── ca-types.md
-│   ├── generator.md
-│   ├── v2.md
-│   └── repo-plan.md
-└── A-New-Kind-of-Science
-    ├── FRONT-MATTER
-    ├── CHAPTERS
-    ├── BACK-MATTER
-    └── A New Kind of Science.md
+ankos
+└── ref
+    ├── ca-types.csv
+    ├── ca-types.md
+    ├── generator.md
+    ├── v2.md
+    ├── repo-plan.md
+    ├── uv-docs
+    └── A-New-Kind-of-Science
+        ├── FRONT-MATTER
+        ├── CHAPTERS
+        ├── BACK-MATTER
+        └── A New Kind of Science.md
 ```
 
 ### Test View
 
 ```text
-CA
+ankos
 └── tests
     ├── test_loci.py
     ├── test_rng.py
@@ -78,64 +82,67 @@ CA
 ### Expanded View
 
 ```text
-CA
-├── A-New-Kind-of-Science
-│   ├── FRONT-MATTER
-│   │   ├── Contents
-│   │   │   └── Contents.md
-│   │   └── Preface
-│   │       └── Preface.md
-│   ├── CHAPTERS
-│   │   ├── 1-The-Foundations-for-a-New-Kind-of-Science
-│   │   │   └── 1-The-Foundations-for-a-New-Kind-of-Science.md
-│   │   ├── 2-The-Crucial-Experiment
-│   │   │   └── 2-The-Crucial-Experiment.md
-│   │   ├── 3-The-World-of-Simple-Programs
-│   │   │   └── 3-The-World-of-Simple-Programs.md
-│   │   ├── 4-Systems-Based-on-Numbers
-│   │   │   └── 4-Systems-Based-on-Numbers.md
-│   │   ├── 5-Two-Dimensions-and-Beyond
-│   │   │   └── 5-Two-Dimensions-and-Beyond.md
-│   │   ├── 6-Starting-from-Randomness
-│   │   │   └── 6-Starting-from-Randomness.md
-│   │   ├── 7-Mechanisms-in-Programs-and-Nature
-│   │   │   └── 7-Mechanisms-in-Programs-and-Nature.md
-│   │   ├── 8-Implications-for-Everyday-Systems
-│   │   │   └── 8-Implications-for-Everyday-Systems.md
-│   │   ├── 9-Fundamental-Physics
-│   │   │   └── 9-Fundamental-Physics.md
-│   │   ├── 10-Processes-of-Perception-and-Analysis
-│   │   │   └── 10-Processes-of-Perception-and-Analysis.md
-│   │   ├── 11-The-Notion-of-Computation
-│   │   │   └── 11-The-Notion-of-Computation.md
-│   │   └── 12-The-Principle-of-Computational-Equivalence
-│   │       └── 12-The-Principle-of-Computational-Equivalence.md
-│   ├── BACK-MATTER
-│   │   ├── Colophon
-│   │   │   └── Colophon.md
-│   │   ├── Index
-│   │   │   └── Index.md
-│   │   └── Notes
-│   │       └── Notes.md
-│   └── A New Kind of Science.md
-├── notes
+ankos
+├── ref
 │   ├── ca-types.csv
 │   ├── ca-types.md
 │   ├── generator.md
 │   ├── v2.md
-│   └── repo-plan.md
-├── ca_lattice
-│   ├── __init__.py
-│   ├── specs.py
-│   ├── loci.py
-│   ├── alphabets.py
-│   ├── neighborhoods.py
-│   ├── frontiers.py
-│   ├── seeds.py
-│   ├── rules.py
-│   ├── boundary.py
-│   ├── rng.py
-│   └── rollout.py
+│   ├── repo-plan.md
+│   ├── uv-docs
+│   └── A-New-Kind-of-Science
+│       ├── FRONT-MATTER
+│       │   ├── Contents
+│       │   │   └── Contents.md
+│       │   └── Preface
+│       │       └── Preface.md
+│       ├── CHAPTERS
+│       │   ├── 1-The-Foundations-for-a-New-Kind-of-Science
+│       │   │   └── 1-The-Foundations-for-a-New-Kind-of-Science.md
+│       │   ├── 2-The-Crucial-Experiment
+│       │   │   └── 2-The-Crucial-Experiment.md
+│       │   ├── 3-The-World-of-Simple-Programs
+│       │   │   └── 3-The-World-of-Simple-Programs.md
+│       │   ├── 4-Systems-Based-on-Numbers
+│       │   │   └── 4-Systems-Based-on-Numbers.md
+│       │   ├── 5-Two-Dimensions-and-Beyond
+│       │   │   └── 5-Two-Dimensions-and-Beyond.md
+│       │   ├── 6-Starting-from-Randomness
+│       │   │   └── 6-Starting-from-Randomness.md
+│       │   ├── 7-Mechanisms-in-Programs-and-Nature
+│       │   │   └── 7-Mechanisms-in-Programs-and-Nature.md
+│       │   ├── 8-Implications-for-Everyday-Systems
+│       │   │   └── 8-Implications-for-Everyday-Systems.md
+│       │   ├── 9-Fundamental-Physics
+│       │   │   └── 9-Fundamental-Physics.md
+│       │   ├── 10-Processes-of-Perception-and-Analysis
+│       │   │   └── 10-Processes-of-Perception-and-Analysis.md
+│       │   ├── 11-The-Notion-of-Computation
+│       │   │   └── 11-The-Notion-of-Computation.md
+│       │   └── 12-The-Principle-of-Computational-Equivalence
+│       │       └── 12-The-Principle-of-Computational-Equivalence.md
+│       ├── BACK-MATTER
+│       │   ├── Colophon
+│       │   │   └── Colophon.md
+│       │   ├── Index
+│       │   │   └── Index.md
+│       │   └── Notes
+│       │       └── Notes.md
+│       └── A New Kind of Science.md
+├── src
+│   └── ca
+│       ├── __init__.py
+│       ├── py.typed
+│       ├── specs.py
+│       ├── loci.py
+│       ├── alphabets.py
+│       ├── neighborhoods.py
+│       ├── frontiers.py
+│       ├── seeds.py
+│       ├── rules.py
+│       ├── boundary.py
+│       ├── rng.py
+│       └── rollout.py
 ├── tests
 │   ├── test_loci.py
 │   ├── test_rng.py
