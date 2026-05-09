@@ -2,9 +2,9 @@
 
 Source scope:
 
-- `A New Kind of Science/CHAPTERS/The-World-of-Simple-Programs/The-World-of-Simple-Programs.md`
-- `A New Kind of Science/CHAPTERS/Systems-Based-on-Numbers/Systems-Based-on-Numbers.md`
-- `A New Kind of Science/CHAPTERS/Two-Dimensions-and-Beyond/Two-Dimensions-and-Beyond.md`
+- `A-New-Kind-of-Science/CHAPTERS/3-The-World-of-Simple-Programs/The-World-of-Simple-Programs.md`
+- `A-New-Kind-of-Science/CHAPTERS/4-Systems-Based-on-Numbers/Systems-Based-on-Numbers.md`
+- `A-New-Kind-of-Science/CHAPTERS/5-Two-Dimensions-and-Beyond/Two-Dimensions-and-Beyond.md`
 
 This index classifies cellular automata, adjacent simple-program systems, number-based systems, and continuous systems by how they are built: data structure, states or value space, neighborhood or access pattern, rule form, update schedule, coding scheme, and initial-condition convention. It deliberately avoids behavior-based classes such as repetitive, nested, random, or localized-structure behavior.
 
