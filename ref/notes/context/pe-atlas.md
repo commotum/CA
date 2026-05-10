@@ -386,8 +386,8 @@ Top-level surface:
 
 - aliases: `CombineMode`, `Metric`, `Region`
 - dataclass: `Neighborhood`
-- implemented factories: `self_at`, `axis_shell`, `l1_shell`, `change_count_shell`, `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`, `compose`
-- stubs: `literal_offsets`, `history`, `radius`, `shell`, `directional_line`, `directional_fov`, `moore`, `von_neumann`
+- implemented factories: `self_at`, `axis_shell`, `l1_shell`, `change_count_shell`, `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`, `compose`, `literal_offsets`, `history`, `radius`, `shell`, `directional_line`, `directional_fov`, `eca`, `moore`, `von_neumann`
+- stubs: none
 
 Function notes:
 

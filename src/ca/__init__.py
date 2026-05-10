@@ -8,7 +8,9 @@ from .boundary import normalize as normalize_boundary
 from .boundary import periodic as periodic_boundary
 from .boundary import reflective as reflective_boundary
 from .frontiers import Frontier, time_slice
-from .neighborhoods import Neighborhood, ar2_0d, axis_shell, change_count_shell, l1_shell, self_at
+from .neighborhoods import Neighborhood, ar2_0d, axis_shell, change_count_shell, directional_fov
+from .neighborhoods import directional_line, eca, history, l1_shell, literal_offsets, moore, radius
+from .neighborhoods import self_at, shell, von_neumann
 from .neighborhoods import dyadrads_1d as dyadrads_1d_neighborhood
 from .neighborhoods import dyadaxes_2d as dyadaxes_2d_neighborhood
 from .neighborhoods import dyadaxes_3d as dyadaxes_3d_neighborhood
@@ -43,6 +45,8 @@ __all__ = [
     "change_count_shell",
     "constant",
     "derive_episode_rng",
+    "directional_fov",
+    "directional_line",
     "dyadrads_1d_neighborhood",
     "dyadrads_1d_rule",
     "dyadaxes_2d_neighborhood",
@@ -50,13 +54,17 @@ __all__ = [
     "dyadaxes_3d_neighborhood",
     "dyadaxes_3d_rule",
     "dynamics_from_spec",
+    "eca",
     "fixed_boundary",
     "float_range_alphabet",
     "frontiers",
+    "history",
     "instantiate",
     "int_range_alphabet",
     "l1_shell",
+    "literal_offsets",
     "loci",
+    "moore",
     "neighborhoods",
     "no_boundary",
     "normalize_boundary",
@@ -66,6 +74,7 @@ __all__ = [
     "point",
     "reflective_boundary",
     "render",
+    "radius",
     "rng",
     "rollout",
     "rule_count",
@@ -73,9 +82,11 @@ __all__ = [
     "selector_seed",
     "seeds",
     "self_at",
+    "shell",
     "splitmix64",
     "symbolic",
     "time_slice",
     "uniform_pair",
     "valid_rule_ids",
+    "von_neumann",
 ]
