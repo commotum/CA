@@ -16,7 +16,7 @@ def test_ar2_rollout_returns_raw_episode() -> None:
         shape=(),
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
-        frontier=frontiers.full_next_slice(()),
+        frontier=frontiers.time_slice(()),
         boundary={},
     )
 
@@ -49,7 +49,7 @@ def test_spatial_lookup_rule_zero_outputs_zero_state() -> None:
         shape=(3,),
         rule=rules.dyadrads_1d(),
         neighborhoods=(neighborhoods.dyadrads_1d(),),
-        frontier=frontiers.full_next_slice((3,)),
+        frontier=frontiers.time_slice((3,)),
         boundary={"policy": "fixed", "value": 0},
     )
 
@@ -71,7 +71,7 @@ def test_2d_rollout_returns_raw_episode() -> None:
         shape=(3, 3),
         rule=rules.dyadaxes_2d(),
         neighborhoods=(neighborhoods.dyadaxes_2d(),),
-        frontier=frontiers.full_next_slice((3, 3)),
+        frontier=frontiers.time_slice((3, 3)),
         boundary={"policy": "fixed", "value": 0},
     )
 
@@ -104,7 +104,7 @@ def test_3d_rollout_returns_raw_episode() -> None:
         shape=(3, 3, 3),
         rule=rules.dyadaxes_3d(),
         neighborhoods=(neighborhoods.dyadaxes_3d(),),
-        frontier=frontiers.full_next_slice((3, 3, 3)),
+        frontier=frontiers.time_slice((3, 3, 3)),
         boundary={"policy": "fixed", "value": 0},
     )
     seed_state = np.zeros((3, 3, 3), dtype=np.int64)
@@ -129,7 +129,7 @@ def test_rollout_can_skip_coord_materialization() -> None:
         shape=(),
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
-        frontier=frontiers.full_next_slice(()),
+        frontier=frontiers.time_slice(()),
         boundary={},
     )
 
@@ -150,7 +150,7 @@ def test_dynamics_normalizes_boundary_policy() -> None:
         shape=(3,),
         rule=rules.dyadrads_1d(),
         neighborhoods=(neighborhoods.dyadrads_1d(),),
-        frontier=frontiers.full_next_slice((3,)),
+        frontier=frontiers.time_slice((3,)),
         boundary="periodic",
     )
 
@@ -182,7 +182,7 @@ def test_rollout_rejects_shape_mismatch() -> None:
         shape=(4,),
         rule=rules.dyadrads_1d(),
         neighborhoods=(neighborhoods.dyadrads_1d(),),
-        frontier=frontiers.full_next_slice((4,)),
+        frontier=frontiers.time_slice((4,)),
         boundary={"policy": "fixed", "value": 0},
     )
 
@@ -201,7 +201,7 @@ def test_rollout_rejects_domain_shape_mismatch_before_coord_materialization() ->
         shape=(3,),
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
-        frontier=frontiers.full_next_slice((3,)),
+        frontier=frontiers.time_slice((3,)),
         boundary={},
     )
 

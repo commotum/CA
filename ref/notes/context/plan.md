@@ -74,7 +74,7 @@ Steps:
 - Convert old repo-local imports to `ca` internal imports.
 - Centralize boundary reads in `ca.boundary`.
 - Make Phase 1 rule instantiation executable for supported families.
-- Make frontier behavior explicit: support `full_next_slice`, reject the rest.
+- Make frontier behavior explicit: support `time_slice`, reject the rest.
 - Keep future stubs visible but honest with `NotImplementedError`.
 - Add focused tests under `/home/jake/Developer/ankos/tests`.
 

@@ -158,7 +158,7 @@ def _rollout_states(
 ) -> np.ndarray:
     """Roll native states forward without tokenization or batch construction."""
 
-    _ensure_full_next_slice(frontier)
+    _ensure_time_slice(frontier)
 
     if rule.family == "ar2_modular_0d":
         return _rollout_ar2(seed_state, rule, steps)
@@ -421,10 +421,10 @@ def _lookup_index(channel_bits: Sequence[Any]) -> np.ndarray:
     return index.astype(np.int64)
 
 
-def _ensure_full_next_slice(frontier: Any) -> None:
+def _ensure_time_slice(frontier: Any) -> None:
     family = getattr(frontier, "family", None)
     if isinstance(frontier, Mapping):
         family = frontier.get("family", family)
-    if family == "full_next_slice":
+    if family == "time_slice":
         return
-    raise NotImplementedError("ankos Phase 1 supports only full_next_slice rollout")
+    raise NotImplementedError("ankos Phase 1 supports only time_slice rollout")

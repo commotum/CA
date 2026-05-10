@@ -165,8 +165,8 @@ def frontier_from_spec(
     spec_dict = _family_spec(spec)
     family = spec_dict["family"]
 
-    if family in {"full_next_slice", "time_slice"}:
-        return frontiers_lib.full_next_slice(shape)
+    if family == "time_slice":
+        return frontiers_lib.time_slice(shape)
 
     raise ValueError(f"unsupported Phase 1 frontier family {family!r}")
 

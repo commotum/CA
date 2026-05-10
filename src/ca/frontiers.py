@@ -92,14 +92,8 @@ def time_slice(shape: Sequence[int]) -> Frontier:
         components=(component,),
         name="time_slice",
         params={"t": 0},
-        family="full_next_slice",
+        family="time_slice",
     )
-
-
-def full_next_slice(shape: Sequence[int]) -> Frontier:
-    """Select the full current state slice for Phase 1 synchronous rollout."""
-
-    return time_slice(shape)
 
 
 # ---------------------------------------------------------------------------

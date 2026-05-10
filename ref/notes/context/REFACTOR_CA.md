@@ -440,14 +440,14 @@ old/data/components/frontiers.py
 Phase 1 executable frontier:
 
 ```text
-full_next_slice()
+time_slice()
 ```
 
 The target module is still named `frontiers.py`, but Phase 1 rollout should
 reject unsupported frontier families:
 
 ```python
-if dynamics.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "time_slice":
     raise NotImplementedError(...)
 ```
 
@@ -658,13 +658,13 @@ Phase 1 rollout behavior:
 ```
 
 Old `data/generate.py` accepted a frontier argument but ignored it. The new
-rollout must not silently do that. Phase 1 supports only full-next-slice
+rollout must not silently do that. Phase 1 supports only current time-slice
 synchronous rollout:
 
 ```python
-if dynamics.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "time_slice":
     raise NotImplementedError(
-        "ankos Phase 1 supports only full_next_slice rollout"
+        "ankos Phase 1 supports only time_slice rollout"
     )
 ```
 
@@ -694,7 +694,7 @@ spec dataclasses
 supported alphabet factories
 supported boundary factories
 supported neighborhood factories
-full_next_slice
+time_slice
 supported seed factories and render()
 supported rule factories and instantiate()
 rule_count() and valid_rule_ids()
@@ -987,7 +987,7 @@ Recommended contents:
   "seed": {"family": "bernoulli", "params": {"p": 0.5}},
   "dynamics": {
     "neighborhood": {"family": "dyadaxes_2d"},
-    "frontier": {"family": "full_next_slice"},
+    "frontier": {"family": "time_slice"},
     "rule": {"family": "dyadaxes_2d", "rule_count": 256},
     "boundary": {"policy": "fixed", "value": 0}
   },
@@ -1116,7 +1116,7 @@ State:
   binary
 
 Update:
-  full-next-slice synchronous update
+  current time-slice synchronous update
 
 Neighborhood:
   previous self

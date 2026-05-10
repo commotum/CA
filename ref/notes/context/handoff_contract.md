@@ -39,7 +39,7 @@ only the mechanics needed to evolve raw states:
 domain: t+0d | t+1d | t+2d | t+3d
 shape: spatial shape only
 neighborhoods: source-relative read structures
-frontier: Phase 1 full_next_slice
+frontier: Phase 1 time_slice
 rule: rule family/mechanics
 boundary: none | fixed | periodic | reflective
 ```
@@ -160,9 +160,9 @@ Episode.metadata -> RawEpisode.metadata
 `ca.rollout()` must enforce the executable frontier:
 
 ```python
-if dynamics.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "time_slice":
     raise NotImplementedError(
-        "ankos Phase 1 supports only full_next_slice rollout"
+        "ankos Phase 1 supports only time_slice rollout"
     )
 ```
 
