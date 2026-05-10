@@ -29,27 +29,13 @@ filter rules. Runtime sampling and rollout-based filtering belong to
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
 from . import boundary as boundary_lib
 from . import loci, rules
-
-
-@dataclass(frozen=True)
-class Episode:
-    """Raw generated episode before tokenization or batching."""
-
-    dataset_id: str
-    domain: str
-    rule_id: int
-    shape: tuple[int, ...]
-    steps: int
-    states: Any
-    coords: Any | None = None
-    metadata: Mapping[str, Any] | None = None
+from .specs import Dynamics, RawEpisode
 
 
 def _not_implemented() -> None:
@@ -67,7 +53,7 @@ def generate_episode(
     rule_id: int,
     steps: int,
     boundary: Mapping[str, Any] | None = None,
-) -> Episode:
+) -> RawEpisode:
     """Generate one deterministic raw episode from an already rendered seed state."""
 
     steps = int(steps)
@@ -75,48 +61,111 @@ def generate_episode(
         raise ValueError(f"steps must be at least 2 for next-state targets, got {steps}")
 
     boundary = dict(getattr(dataset_spec, "boundary", {}) if boundary is None else boundary)
-    rule = rules.instantiate(dataset_spec.rule, int(rule_id))
-    states = rollout(
-        initial_state=initial_state,
-        rule=rule,
+    domain = str(dataset_spec.domain).lower()
+    spec_shape = getattr(dataset_spec, "shape", None)
+    if spec_shape is None:
+        shape = () if domain == "t+0d" else tuple(int(size) for size in np.asarray(initial_state).shape)
+    else:
+        shape = tuple(int(size) for size in spec_shape)
+
+    dynamics = Dynamics(
+        domain=domain,
+        shape=shape,
+        rule=dataset_spec.rule,
         neighborhoods=dataset_spec.neighborhoods,
         frontier=dataset_spec.frontier,
         boundary=boundary,
+        metadata={"dataset_id": dataset_spec.id},
+    )
+    episode = rollout(
+        dynamics,
+        rule_id=int(rule_id),
+        seed_state=initial_state,
         steps=steps,
     )
-
-    state_shape = tuple(int(size) for size in np.asarray(states).shape[1:])
-
-    return Episode(
-        dataset_id=dataset_spec.id,
-        domain=dataset_spec.domain,
-        rule_id=int(rule_id),
-        shape=state_shape,
-        steps=steps,
-        states=states,
-        coords=canonical_coords(state_shape, steps),
-        metadata={"boundary": boundary},
+    return RawEpisode(
+        domain=episode.domain,
+        shape=episode.shape,
+        rule_id=episode.rule_id,
+        steps=episode.steps,
+        states=episode.states,
+        coords=episode.coords,
+        metadata={**dict(episode.metadata or {}), "dataset_id": dataset_spec.id},
     )
 
 
 def rollout(
-    initial_state: Any,
+    dynamics: Dynamics,
+    rule_id: int,
+    seed_state: Any,
+    steps: int,
+    *,
+    rng: Any | None = None,
+    return_coords: bool = True,
+) -> RawEpisode:
+    """Roll CA dynamics forward and return a raw episode."""
+
+    del rng
+
+    if not isinstance(dynamics, Dynamics):
+        raise TypeError("rollout requires a ca.Dynamics instance")
+
+    steps = int(steps)
+    if steps <= 0:
+        raise ValueError(f"steps must be positive, got {steps}")
+
+    _validate_domain_shape(dynamics.domain, tuple(dynamics.shape))
+
+    rule = rules.instantiate(dynamics.rule, int(rule_id))
+    states = _rollout_states(
+        seed_state=seed_state,
+        rule=rule,
+        neighborhoods=dynamics.neighborhoods,
+        frontier=dynamics.frontier,
+        boundary=dynamics.boundary,
+        steps=steps,
+    )
+
+    shape = tuple(int(size) for size in np.asarray(states).shape[1:])
+    if shape != tuple(dynamics.shape):
+        raise ValueError(
+            f"seed_state produced spatial shape {shape}, but dynamics.shape is {tuple(dynamics.shape)}"
+        )
+
+    coords = canonical_coords(dynamics.domain, shape, steps) if return_coords else None
+
+    return RawEpisode(
+        domain=dynamics.domain,
+        shape=shape,
+        rule_id=int(rule_id),
+        steps=steps,
+        states=np.asarray(states),
+        coords=coords,
+        metadata={
+            "boundary": dict(dynamics.boundary),
+            **dict(dynamics.metadata or {}),
+        },
+    )
+
+
+def _rollout_states(
+    seed_state: Any,
     rule: Any,
     neighborhoods: Sequence[Any],
     frontier: Any,
     boundary: Mapping[str, Any],
     steps: int,
-) -> Any:
+) -> np.ndarray:
     """Roll native states forward without tokenization or batch construction."""
 
     _ensure_full_next_slice(frontier)
 
     if rule.family == "ar2_modular_0d":
-        return _rollout_ar2(initial_state, rule, steps)
+        return _rollout_ar2(seed_state, rule, steps)
 
     if rule.family in {"dyadrads_1d", "dyadaxes_2d", "dyadaxes_3d"}:
         return _rollout_spatial_lookup(
-            initial_state=initial_state,
+            initial_state=seed_state,
             rule=rule,
             neighborhoods=neighborhoods,
             boundary=boundary,
@@ -126,11 +175,43 @@ def rollout(
     raise NotImplementedError(f"unsupported phase-1 rule family {rule.family!r}")
 
 
-def canonical_coords(shape: Sequence[int], steps: int) -> Any:
-    """Return canonical `[t, x, y, z]` coordinates in time-major order."""
+def canonical_coords(
+    domain_or_shape: str | Sequence[int],
+    shape_or_steps: Sequence[int] | int,
+    steps: int | None = None,
+) -> np.ndarray:
+    """Return flattened canonical `[t, x, y, z]` coordinates in time-major order."""
 
-    space = loci.coordinate_space(tuple(int(size) for size in shape), steps=int(steps))
-    return loci.coord_grid(space)
+    if steps is None:
+        domain = None
+        shape = domain_or_shape
+        steps = int(shape_or_steps)  # type: ignore[arg-type]
+    else:
+        domain = str(domain_or_shape).lower()
+        shape = shape_or_steps
+
+    shape_tuple = tuple(int(size) for size in shape)  # type: ignore[arg-type]
+    if domain is not None:
+        _validate_domain_shape(domain, shape_tuple)
+
+    space = loci.coordinate_space(shape_tuple, steps=int(steps))
+    return loci.coord_grid(space).reshape(-1, 4)
+
+
+def _validate_domain_shape(domain: str, shape: tuple[int, ...]) -> None:
+    ranks = {
+        "t+0d": 0,
+        "t+1d": 1,
+        "t+2d": 2,
+        "t+3d": 3,
+    }
+    expected_rank = ranks.get(str(domain).lower())
+    if expected_rank is None:
+        raise ValueError(f"unsupported CA domain {domain!r}")
+    if len(shape) != expected_rank:
+        raise ValueError(
+            f"domain {domain!r} requires spatial rank {expected_rank}, got shape {shape}"
+        )
 
 
 def apply_boundary_read(
@@ -341,8 +422,9 @@ def _lookup_index(channel_bits: Sequence[Any]) -> np.ndarray:
 
 
 def _ensure_full_next_slice(frontier: Any) -> None:
-    name = getattr(frontier, "name", None)
     family = getattr(frontier, "family", None)
-    if name in {"time_slice", "full_next_slice"} or family == "full_next_slice":
+    if isinstance(frontier, Mapping):
+        family = frontier.get("family", family)
+    if family == "full_next_slice":
         return
     raise NotImplementedError("ankos Phase 1 supports only full_next_slice rollout")

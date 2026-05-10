@@ -38,7 +38,7 @@ only the mechanics needed to evolve raw states:
 ```text
 domain: t+0d | t+1d | t+2d | t+3d
 shape: spatial shape only
-neighborhood: source-relative read structure
+neighborhoods: source-relative read structures
 frontier: Phase 1 full_next_slice
 rule: rule family/mechanics
 boundary: none | fixed | periodic | reflective
@@ -135,7 +135,7 @@ DatasetSpec.id        -> PE dataset_id / manifest identity
 DatasetSpec.domain    -> ca.Dynamics.domain
 DatasetSpec.shape     -> ca.Dynamics.shape
 DatasetSpec.alphabet  -> PE manifest/vocab metadata, not rollout dynamics
-neighborhoods         -> ca.Dynamics.neighborhood
+neighborhoods         -> ca.Dynamics.neighborhoods
 frontier              -> ca.Dynamics.frontier
 rule                  -> ca.Dynamics.rule
 seeds                 -> rendered seed_state or PE stream seed choices

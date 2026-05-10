@@ -55,6 +55,7 @@ class Frontier:
     combine: CombineMode = "or"
     name: str | None = None
     params: Mapping[str, Any] | None = None
+    family: str | None = None
 
 
 def _not_implemented() -> None:
@@ -91,7 +92,14 @@ def time_slice(shape: Sequence[int]) -> Frontier:
         components=(component,),
         name="time_slice",
         params={"t": 0},
+        family="full_next_slice",
     )
+
+
+def full_next_slice(shape: Sequence[int]) -> Frontier:
+    """Select the full current state slice for Phase 1 synchronous rollout."""
+
+    return time_slice(shape)
 
 
 # ---------------------------------------------------------------------------
