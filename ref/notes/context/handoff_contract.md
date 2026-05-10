@@ -28,7 +28,6 @@ dynamics: ca.Dynamics
 rule_id: int
 seed_state: np.ndarray-like
 steps: int
-rng: optional NumPy-compatible RNG or seed
 return_coords: bool
 ```
 
@@ -161,9 +160,7 @@ Episode.metadata -> RawEpisode.metadata
 
 ```python
 if dynamics.frontier.family != "time_slice":
-    raise NotImplementedError(
-        "ankos Phase 1 supports only time_slice rollout"
-    )
+    raise ValueError(f"unsupported frontier family {dynamics.frontier.family!r}")
 ```
 
 Old `data/generate.py` accepted frontier-like inputs but ignored them. The new
