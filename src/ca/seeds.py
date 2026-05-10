@@ -33,7 +33,7 @@ from . import loci
 
 Metric = Literal["l1", "l2", "linf"]
 Stratum = Literal["volume", "shell", "outline", "vertices"]
-DedupeMode = Literal["exact", "symmetry"]
+DedupeMode = Literal["exact"]
 
 
 @dataclass(frozen=True)
@@ -53,10 +53,6 @@ class Seed:
     family: str | None = None
     params: Mapping[str, Any] | None = None
     name: str | None = None
-
-
-def _not_implemented() -> None:
-    raise NotImplementedError("seeds.py currently contains catalog specs only")
 
 
 def _as_rng(rng: Any | None) -> np.random.Generator:
@@ -805,20 +801,10 @@ def path(
 def transform(
     seed_spec: Seed,
     invert: bool = False,
-    reflect: Sequence[str] = (),
-    permute: Sequence[str] | None = None,
-    rotate: Any | None = None,
 ) -> Seed:
-    """Transform a seed support.
-
-    Phase 2 supports complement/invert. Orientation transforms remain explicit
-    stubs until the corresponding coordinate-transform helpers exist.
-    """
+    """Transform a seed support by optional complementing."""
 
     seed = seed_spec
-
-    if reflect or permute is not None or rotate is not None:
-        _not_implemented()
 
     if not invert:
         return seed
@@ -849,9 +835,6 @@ def transform(
         params={
             "seed_spec": seed_spec,
             "invert": invert,
-            "reflect": tuple(reflect),
-            "permute": permute,
-            "rotate": rotate,
         },
     )
 
@@ -922,7 +905,7 @@ def dedupe(
     """Remove duplicate rendered seed supports for a concrete shape."""
 
     if mode != "exact":
-        _not_implemented()
+        raise ValueError(f"unsupported dedupe mode {mode!r}")
 
     kept = []
     seen = set()

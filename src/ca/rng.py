@@ -41,7 +41,7 @@ def derive_episode_rng(seed_stream: Mapping[str, Any] | int, episode_index: int)
     if isinstance(seed_stream, Mapping):
         policy = seed_stream.get("policy", "splitmix64")
         if policy != "splitmix64":
-            raise NotImplementedError(f"unsupported seed stream policy {policy!r}")
+            raise ValueError(f"unsupported seed stream policy {policy!r}")
         if "base_rng" not in seed_stream:
             raise KeyError("seed_stream requires 'base_rng'")
         base_rng = seed_stream["base_rng"]

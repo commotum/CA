@@ -176,7 +176,7 @@ def test_rollout_rejects_unsupported_frontier() -> None:
         frontier=SimpleNamespace(family="partial"),
     )
 
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError):
         ca.rollout(
             dynamics=dynamics,
             rule_id=0,

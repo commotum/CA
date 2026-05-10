@@ -110,7 +110,7 @@ def _rollout_states(
             steps=steps,
         )
 
-    raise NotImplementedError(f"unsupported phase-1 rule family {rule.family!r}")
+    raise ValueError(f"unsupported rule family {rule.family!r}")
 
 
 def canonical_coords(
@@ -169,7 +169,7 @@ def apply_rule(rule: Any, reads: Sequence[Any], rule_id: int) -> Any:
         index = _lookup_index(channel_bits)
         return (int(instantiated.rule_id) >> int(index)) & 1
 
-    raise NotImplementedError(f"unsupported phase-1 rule family {instantiated.family!r}")
+    raise ValueError(f"unsupported rule family {instantiated.family!r}")
 
 
 def _rollout_ar2(initial_state: Any, rule: rules.Rule, steps: int) -> np.ndarray:
@@ -296,7 +296,7 @@ def _channel_state(reads: np.ndarray, channel: rules.RuleChannel) -> np.ndarray:
             state = _apply_gate(state, step, group_size)
             continue
 
-        raise NotImplementedError(f"unsupported rule pipeline step {rule_type!r}")
+        raise ValueError(f"unsupported rule pipeline step {rule_type!r}")
 
     if state is None:
         raise ValueError("rule channel pipeline produced no state")
@@ -332,7 +332,7 @@ def _apply_gate(values: np.ndarray, params: Mapping[str, Any], group_size: int) 
     if gate_type == "floor":
         return np.floor(values.astype(float)).astype(np.int64)
 
-    raise NotImplementedError(f"unsupported gate type {gate_type!r}")
+    raise ValueError(f"unsupported gate type {gate_type!r}")
 
 
 def _lookup_index(channel_bits: Sequence[Any]) -> np.ndarray:
@@ -355,4 +355,4 @@ def _ensure_time_slice(frontier: Any) -> None:
         family = frontier.get("family", family)
     if family == "time_slice":
         return
-    raise NotImplementedError("ankos Phase 1 supports only time_slice rollout")
+    raise ValueError(f"unsupported frontier family {family!r}")

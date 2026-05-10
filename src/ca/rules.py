@@ -16,8 +16,8 @@ The construction hierarchy mirrors `neighborhoods.py`:
 
 This keeps spatial construction in neighborhoods/frontiers, value-space
 construction in alphabets, and rollout mechanics in `rollout.py`. Callers
-choose the alphabet, neighborhood, frontier, seed, boundary, shape, horizon,
-and named rule family.
+choose the alphabet, neighborhood, frontier, seed, shape, horizon, and named
+rule family.
 """
 
 from __future__ import annotations
@@ -76,10 +76,6 @@ class Rule:
     fn: UpdateFn | None = None
     channels: tuple[RuleChannel, ...] = ()
     metadata: Mapping[str, Any] | None = None
-
-
-def _not_implemented() -> None:
-    raise NotImplementedError("rules.py currently contains catalog specs only")
 
 
 def instantiate(rule: Rule, rule_id: int) -> Rule:
@@ -437,166 +433,3 @@ def dyadaxes_3d() -> Rule:
         channels=channels,
         metadata=output.metadata,
     )
-
-
-# ---------------------------------------------------------------------------
-# Phase 2 General Rule Types
-# ---------------------------------------------------------------------------
-
-
-def isotropic(
-    component: int = 0,
-    symmetries: Sequence[Any] = (),
-    input_order: str = "lex",
-) -> RuleChannel:
-    """Represent one component modulo a symmetry group.
-
-    This collapses exhaustive ordered patterns into symmetry orbits. The
-    symmetry machinery itself should stay explicit here rather than being
-    hidden in neighborhood construction.
-    """
-
-    _not_implemented()
-
-
-def histographic(component: int = 0, alphabet_size: int | None = None) -> RuleChannel:
-    """Represent one component by a finite-value histogram.
-
-    This is the Phase 2 histogram-totalistic channel for non-binary finite
-    alphabets. It keeps counts per value instead of only a scalar sum.
-    """
-
-    _not_implemented()
-
-
-def stochastic(
-    source: Rule | RuleChannel | None = None,
-    distribution: Any | None = None,
-    params: Mapping[str, Any] | None = None,
-) -> Rule:
-    """Build a stochastic output rule.
-
-    A stochastic rule returns or samples from a distribution over alphabet
-    values. It may consume exhaustive, isotropic, totalistic, histographic, or
-    formulaic sufficient statistics.
-    """
-
-    _not_implemented()
-
-
-# ---------------------------------------------------------------------------
-# Phase 3 Aliases and Convenience Builders
-# ---------------------------------------------------------------------------
-
-
-def any_gate(source: RuleChannel | Mapping[str, Any]) -> RuleChannel:
-    """Alias for `gate(source, type="any")`."""
-
-    _not_implemented()
-
-
-def all_gate(source: RuleChannel | Mapping[str, Any]) -> RuleChannel:
-    """Alias for `gate(source, type="all")`."""
-
-    _not_implemented()
-
-
-def majority_gate(source: RuleChannel | Mapping[str, Any]) -> RuleChannel:
-    """Alias for `gate(source, type="majority")`."""
-
-    _not_implemented()
-
-
-def at_least_gate(
-    source: RuleChannel | Mapping[str, Any],
-    value: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="atLeast", value=value)`."""
-
-    _not_implemented()
-
-
-def at_most_gate(
-    source: RuleChannel | Mapping[str, Any],
-    value: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="atMost", value=value)`."""
-
-    _not_implemented()
-
-
-def exactly_gate(
-    source: RuleChannel | Mapping[str, Any],
-    value: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="exactly", value=value)`."""
-
-    _not_implemented()
-
-
-def min_gate(
-    source: RuleChannel | Mapping[str, Any],
-    value: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="min", value=value)`."""
-
-    _not_implemented()
-
-
-def max_gate(
-    source: RuleChannel | Mapping[str, Any],
-    value: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="max", value=value)`."""
-
-    _not_implemented()
-
-
-def clamp_gate(
-    source: RuleChannel | Mapping[str, Any],
-    min: int | float,
-    max: int | float,
-) -> RuleChannel:
-    """Alias for `gate(source, type="clamp", min=min, max=max)`."""
-
-    _not_implemented()
-
-
-def ceil_gate(source: RuleChannel | Mapping[str, Any]) -> RuleChannel:
-    """Alias for `gate(source, type="ceil")`."""
-
-    _not_implemented()
-
-
-def floor_gate(source: RuleChannel | Mapping[str, Any]) -> RuleChannel:
-    """Alias for `gate(source, type="floor")`."""
-
-    _not_implemented()
-
-
-def binary_lookup(num_bits: int, decode: DecodeMode = "lsb_rule_bits") -> Rule:
-    """Alias for a binary exhaustive lookup over `num_bits` channel outputs."""
-
-    _not_implemented()
-
-
-def modular_ar(
-    order: int,
-    modulus: int,
-    coefficients: Sequence[int] | None = None,
-    constant: int = 1,
-    decode: str | None = None,
-) -> Rule:
-    """Alias family for modular autoregressive scalar recurrences."""
-
-    _not_implemented()
-
-
-def dyadaxes(
-    rank: Literal[2, 3],
-    primary_gate: Mapping[str, Any] | None = None,
-    secondary_gate: Mapping[str, Any] | None = None,
-) -> Rule:
-    """Alias for rank-specific Dyadaxes rule families."""
-
-    _not_implemented()

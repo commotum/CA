@@ -1,7 +1,5 @@
 """Alphabet and value-space catalog factories.
 
-Treat this as a tentative plan, not a prescription.
-
 This module defines raw value spaces used by generated trajectories. An
 alphabet is not a vocabulary and does not assign token ids. It only defines the
 values a trajectory cell, symbol, register, or field may contain before
@@ -36,7 +34,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Hashable, Literal
+from typing import Any
 
 
 Value = int | float | str
@@ -56,52 +54,6 @@ class Alphabet:
     family: str
     params: Mapping[str, Any]
     name: str | None = None
-
-
-@dataclass(frozen=True)
-class IntegerSpace:
-    """Discrete integer value space.
-
-    This is for future number-based engines such as register machines, integer
-    maps, arithmetic iterations, and recursive sequences. It is not directly a
-    finite alphabet unless `upper` and `lower` make the range finite or a
-    downstream representation layer explicitly bounds it.
-    """
-
-    lower: int | None = None
-    upper: int | None = None
-    family: str = "integer_space"
-    params: Mapping[str, Any] | None = None
-    name: str | None = None
-
-
-@dataclass(frozen=True)
-class RealInterval:
-    """Continuous scalar interval value space.
-
-    This is for future continuous cellular automata and iterated maps. It is not
-    directly representable without a discretization, quantization, or
-    regression target policy in the downstream representation layer.
-    """
-
-    low: float = 0.0
-    high: float = 1.0
-    closed: bool = True
-    family: str = "real_interval"
-    params: Mapping[str, Any] | None = None
-    name: str | None = None
-
-
-ValueSpace = Alphabet | IntegerSpace | RealInterval
-
-
-def _not_implemented() -> None:
-    raise NotImplementedError("alphabets.py currently contains catalog specs only")
-
-
-# ---------------------------------------------------------------------------
-# Core Alphabet Families
-# ---------------------------------------------------------------------------
 
 
 def int_range_alphabet(size: int, start: int = 0) -> Alphabet:
@@ -191,7 +143,7 @@ def boolean() -> Alphabet:
     )
 
 
-def symbolic(values: Sequence[Hashable]) -> Alphabet:
+def symbolic(values: Sequence[int | str]) -> Alphabet:
     """Build an alphabet from explicit symbolic values.
 
     This is reserved for non-numeric or semantically named cell states. Values
@@ -223,51 +175,3 @@ def symbolic(values: Sequence[Hashable]) -> Alphabet:
         family="symbolic",
         params={"values": values},
     )
-
-
-# ---------------------------------------------------------------------------
-# Phase 2 Future Value-Space Families
-# ---------------------------------------------------------------------------
-
-
-def composite(
-    layers: Mapping[str, Alphabet | Mapping[str, Any]],
-    mode: Literal["product", "tagged_union"] = "product",
-) -> Alphabet:
-    """Build a finite composite alphabet from finite layers.
-
-    This is the future hook for systems whose cell value carries multiple
-    finite roles, such as a tape symbol plus an optional head state, or a color
-    layer plus an activity marker. `mode="product"` enumerates combinations of
-    layer values. `mode="tagged_union"` enumerates tagged alternatives.
-
-    This should only be used when the composite value itself is the raw cell
-    value. Engine-level roles such as `blank_symbol`, `head_state`, or
-    `active_position` should remain engine metadata when they are not stored in
-    every cell.
-    """
-
-    _not_implemented()
-
-
-def integer_space(lower: int | None = 0, upper: int | None = None) -> IntegerSpace:
-    """Build an integer value space for future number-based systems.
-
-    This covers register values, integer maps, arithmetic iterations, and
-    integer recursive sequences. Unbounded integer spaces are value spaces, not
-    finite alphabets. A downstream representation layer must either reject
-    them, bound them, or use a separate numeric representation policy.
-    """
-
-    _not_implemented()
-
-
-def real_interval(low: float = 0.0, high: float = 1.0, closed: bool = True) -> RealInterval:
-    """Build a continuous scalar interval for future continuous systems.
-
-    This covers continuous cellular automata and iterated maps whose state value
-    is a real scalar, usually in `[0, 1]`. It requires a downstream numerical or
-    discretization policy before it can participate in downstream training.
-    """
-
-    _not_implemented()

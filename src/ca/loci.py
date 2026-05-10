@@ -59,10 +59,6 @@ class Selection:
     universe: Tensor
 
 
-def _not_implemented() -> None:
-    raise NotImplementedError("loci.py currently contains NumPy selector primitives only")
-
-
 def coordinate_space(
     shape: Sequence[int],
     steps: int | None = None,

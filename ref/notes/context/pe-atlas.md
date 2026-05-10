@@ -196,32 +196,27 @@ Notable mismatches:
 
 Target path: `ankos/src/ca/alphabets.py`.
 
-Role: finite raw value-space catalog for dataset values before tokenization, with some future value-space stubs.
+Role: finite raw value-space catalog for dataset values before tokenization.
 
-Important dependencies: standard library only: `math`, `dataclass`, `Mapping`, `Sequence`, `Any`, `Hashable`, `Literal`.
+Important dependencies: standard library only: `math`, `dataclass`, `Mapping`, `Sequence`, `Any`.
 
 Top-level surface:
 
-- aliases: `Value`, `ValueSpace`
-- dataclasses: `Alphabet`, `IntegerSpace`, `RealInterval`
+- aliases: `Value`
+- dataclasses: `Alphabet`
 - factories: `int_range_alphabet`, `float_range_alphabet`, `boolean`, `symbolic`
-- stubs: `composite`, `integer_space`, `real_interval`
 
 Function notes:
 
 - `Alphabet` stores finite values, family, params, and optional name.
-- `IntegerSpace` and `RealInterval` are constructible dataclasses but their factories are unimplemented.
 - `int_range_alphabet` validates positive integer size and returns contiguous integer values.
 - `float_range_alphabet` validates finite numeric start/step and returns evenly spaced float values.
 - `boolean` returns integer values `(0, 1)`.
 - `symbolic` accepts non-empty unique `int` or `str` values, rejecting bools and floats.
-- `composite`, `integer_space`, and `real_interval` always raise.
 
 Notable mismatches:
 
-- Docstrings say tentative/catalog-only, but finite factories are implemented.
 - Frozen dataclasses carry mutable dict params.
-- `symbolic` type hints allow `Hashable`, while runtime allows only `int | str`.
 - `Value` includes floats, but symbolic alphabets reject floats.
 - `name` fields exist but factories do not accept names.
 
@@ -304,7 +299,7 @@ Notable mismatches:
 
 Target path: `ankos/src/ca/frontiers.py`.
 
-Role: frontier/update-site selector catalog. Current executable behavior is mostly a single full-time-slice frontier; most APIs are placeholders.
+Role: frontier/update-site selector catalog. Current executable behavior is the full time-slice frontier.
 
 Important dependencies:
 
@@ -313,23 +308,19 @@ Important dependencies:
 
 Top-level surface:
 
-- aliases: `CombineMode`, `Metric`, `Region`
+- aliases: `CombineMode`
 - dataclass: `Frontier`
 - implemented: `time_slice`
-- stubs: `where`, `schedule_class`, `spatial_subspace`, `diagonal`, `parity_sublattice`, `metric_region`, `ring_growth`, `active_wavefront`, `compose`, `skipped_slices`, `row`, `plane`, `moving_subspace`
 
 Function notes:
 
 - `Frontier` stores selector components, combine mode, name, and params.
 - `time_slice(shape)` builds a selector over the absolute current slice using `loci.coordinate_space`, `absolute_universe(..., t=0)`, and lex order.
-- All other public factories currently raise.
 
 Notable mismatches:
 
 - `time_slice` hard-codes `t=0`, so “current time” is represented as relative zero rather than runtime time.
-- Most factory signatures lack shape even though a universe needs shape.
-- Several docstrings mention helper predicates not currently used.
-- `compose` is documented but unimplemented.
+- Future frontier sketches live in `ref/roadmap/frontiers.py`, not in the runtime package.
 
 ## `data/components/loci.py`
 
@@ -387,7 +378,7 @@ Top-level surface:
 - aliases: `CombineMode`, `Metric`, `Region`
 - dataclass: `Neighborhood`
 - implemented factories: `self_at`, `axis_shell`, `l1_shell`, `change_count_shell`, `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`, `compose`, `literal_offsets`, `history`, `radius`, `shell`, `directional_line`, `directional_fov`, `eca`, `moore`, `von_neumann`
-- stubs: none
+- future sketches: none in runtime
 
 Function notes:
 
@@ -407,13 +398,12 @@ Notable mismatches:
 - Composing compound neighborhoods loses one nesting level.
 - Some “shell” APIs allow center/radius-zero behavior.
 - Spatial factories accept arbitrary time offsets, including future-positive values.
-- Many Phase 2/3 names are importable but unimplemented.
 
 ## `data/components/rules.py`
 
 Target path: `ankos/src/ca/rules.py`.
 
-Role: rule catalog/spec layer for CA-style updates. It defines rule/channel descriptors and named Phase 1 rule families.
+Role: rule catalog/spec layer for CA-style updates. It defines rule/channel descriptors and the supported named rule families.
 
 Important dependencies: standard library `Callable`, `Mapping`, `Sequence`, `dataclass`, `Any`, `Literal`.
 
@@ -422,7 +412,6 @@ Top-level surface:
 - aliases: `UpdateFn`, `Aggregate`, `DecodeMode`, `GateType`
 - dataclasses: `RuleChannel`, `Rule`
 - implemented: `instantiate`, `validate`, `exhaustive`, `totalistic`, `gate`, `lookup`, `compose`, `formulaic`, `ar2_modular_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`
-- stubs: `isotropic`, `histographic`, `stochastic`, gate aliases, `binary_lookup`, `modular_ar`, `dyadaxes`
 
 Function notes:
 
@@ -445,7 +434,7 @@ Notable mismatches:
 - Non-AR2 instantiated rules often still have `fn=None`.
 - `validate` is named like a checker but only computes counts.
 - Gate names imply non-binary transforms, but gate metadata always sets binary state count.
-- Phase 3 “aliases” are placeholders rather than aliases.
+- Future rule sketches live in `ref/roadmap/rules.py`, not in the runtime package.
 
 ## `data/components/seeds.py`
 
@@ -477,8 +466,8 @@ Function notes:
 - `point`, `subspace`, `finite_segment`, `body`, `compound`, `region`, and `periodic` build selector-backed structured seeds.
 - `fractal` and `spiral` wrap callable predicates into seed params.
 - `path` selects explicit listed points, optionally thickened; it does not interpolate.
-- `transform` currently supports inversion; reflect/permute/rotate are stubs.
-- `render` materializes a `Seed` into a `torch.long` tensor.
+- `transform` supports inversion only.
+- `render` materializes a `Seed` into a NumPy array.
 - `dedupe` removes duplicate rendered tensors.
 - `structured` enumerates many structured seed families and optionally dedupes.
 - `constant` creates full-shape constant seeds.
@@ -486,7 +475,6 @@ Function notes:
 Notable mismatches:
 
 - This is runtime rendering code, not just catalog specs.
-- `symmetry` dedupe mode exists but is unimplemented.
 - `dedupe` dedupes rendered tensors, not support masks.
 - `bernoulli` accepts mapping support by type but does not implement it.
 - `path` accepts 4D points but only selects from `t=0`; `point` can use nonzero time.
