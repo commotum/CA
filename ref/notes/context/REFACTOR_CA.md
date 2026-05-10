@@ -141,6 +141,7 @@ ankos/src/ca/rng.py
   old/data/batch.py: splitmix64
   old/data/batch.py: derive_episode_rng
   old/data/batch.py: render_seed_state torch-generator call site, as a NumPy replacement guide only
+  old/data/generate.py: no RNG ownership; rollout is deterministic after seed_state is rendered
 ```
 
 Boundary defaults and eval variants are PE policy, not CA mechanics:
@@ -447,7 +448,7 @@ reject unsupported frontier families:
 
 ```python
 if dynamics.frontier.family != "time_slice":
-    raise NotImplementedError(...)
+    raise ValueError(f"unsupported frontier family {dynamics.frontier.family!r}")
 ```
 
 This fixes the old mismatch where a frontier existed in the API but rollout
@@ -566,6 +567,13 @@ numpy_rng()
 helper is PE-side or future backend-specific code, not part of the baseline
 `ankos` public API.
 
+`ca.rng` is used before rollout. PE stream code derives a per-episode RNG from
+`seed_stream.base_rng` and `episode_index`, uses PE policy to select the seed
+recipe, and passes the derived RNG to `ca.seeds.render(...)` when rendering
+stochastic seeds. `ca.rollout()` does not accept or consume RNG because old
+generation was deterministic once `seed_state`, `rule_id`, `steps`, and
+boundary were fixed.
+
 Do not put these PE policies in `ca.rng`:
 
 ```text
@@ -592,6 +600,11 @@ This module owns raw next-state trajectory generation. It answers:
 Given CA dynamics, seed state, rule id, and step count, what raw trajectory is
 generated?
 ```
+
+It does not choose seed recipes or render stochastic seeds. Those happen before
+rollout: PE derives the episode RNG with `ca.rng`, selects the seed recipe from
+the prepared stream policy, renders `seed_state` through `ca.seeds.render(...)`,
+then calls `ca.rollout(...)`.
 
 Useful surface:
 
@@ -652,9 +665,7 @@ synchronous rollout:
 
 ```python
 if dynamics.frontier.family != "time_slice":
-    raise NotImplementedError(
-        "ankos Phase 1 supports only time_slice rollout"
-    )
+    raise ValueError(f"unsupported frontier family {dynamics.frontier.family!r}")
 ```
 
 Rollout returns raw CA output:
@@ -809,10 +820,11 @@ It owns:
 
 ```text
 reading prepared train/eval stream specs
-deriving per-episode RNGs
+deriving per-episode RNGs with ca.rng from seed_stream.base_rng and episode_index
 sampling or cycling rule ids from prepared rule pools
-rendering CA seed states through ca
-calling ca.rollout()
+selecting seed recipes from PE stream policy
+rendering CA seed states through ca.seeds.render(..., rng=...)
+calling ca.rollout() without RNG
 applying runtime rollout filters when implemented
 calling components.tokenizer
 converting NumPy-compatible CA arrays with torch.from_numpy(...)

@@ -242,9 +242,11 @@ It does not build the model, tokenizer, PE caches, or data streams.
 
 `components/batch.py` turns prepared or generated dataset streams into
 model-ready training batches. It should read prepared train/eval stream specs,
-derive episode RNGs, select rule ids from prepared pools, render CA seeds, call
-`ca.rollout()`, invoke `components/tokenizer.py`, build dense state-causal
-masks, collate coordinates/position ids/cache-layout ids, and move tensors
+derive episode RNGs with `ca.rng` from stream `base_rng` plus `episode_index`,
+select rule ids from prepared pools, select seed recipes from PE stream policy,
+render CA seeds with `ca.seeds.render(..., rng=...)`, call `ca.rollout()`
+without RNG, invoke `components/tokenizer.py`, build dense state-causal masks,
+collate coordinates/position ids/cache-layout ids, and move tensors
 efficiently.
 
 ## Root Files

@@ -94,6 +94,7 @@ Steps:
 - Return materialized `coords` as integer ndarray-like arrays when requested.
 - Make seed rendering produce ndarray-like raw states.
 - Replace public torch RNG helpers with NumPy RNG helpers.
+- Keep RNG out of `ca.rollout()`; derived RNG is used before rollout to select/render seed states.
 - Keep any future torch backend optional and out of the baseline contract.
 
 Exit criteria:
@@ -169,9 +170,9 @@ Goal: make PE consume `ankos` through the documented contract.
 Steps:
 
 - Build `ca.Dynamics` values from dataset manifests/preparation scripts.
-- Derive episode RNGs and rule ids from PE stream policy.
-- Render seed states through `ca`.
-- Call `ca.rollout()` from `components/batch.py`.
+- Derive episode RNGs with `ca.rng` and rule ids from PE stream policy.
+- Select seed recipes from PE stream policy and render seed states through `ca.seeds.render(..., rng=...)`.
+- Call `ca.rollout()` from `components/batch.py` with `Dynamics`, `rule_id`, rendered `seed_state`, and `steps` only.
 - Serialize `ca.RawEpisode` in `components/tokenizer.py`.
 - Convert NumPy-compatible arrays with `torch.from_numpy(...)` at the batch boundary.
 - Collate token ids, targets, loss masks, coords, position ids, and layout ids.

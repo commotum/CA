@@ -368,7 +368,8 @@ alphabet, neighborhood, frontier, seed, rule, and boundary primitives
 deterministic RNG primitives
 raw rollout
 raw canonical coordinates
-no PE tokens, masks, losses, or model batches
+no PE stream policy, seed-recipe selection, tokens, masks, losses, or model batches
+no rollout-time RNG; stochastic seeds are rendered before rollout
 ```
 
 `data/<dataset>/prepare.py` owns:
