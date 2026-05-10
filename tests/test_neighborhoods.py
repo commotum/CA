@@ -185,7 +185,7 @@ def test_shell_matches_radius_shell_without_center() -> None:
         radius=1,
         include_center=False,
     )
-    wrapped = neighborhoods.shell(("x", "y"), metric="l1", radius=1)
+    wrapped = neighborhoods.shell(("x", "y"), metric="l1", r=1)
 
     assert _coords(wrapped) == _coords(direct)
     assert wrapped.name == "shell"
