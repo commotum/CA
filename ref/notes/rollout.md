@@ -61,7 +61,7 @@ Move these concepts over:
 
 ```text
 Episode / RawEpisode dataclass
-generate_episode / rollout
+rollout
 canonical_coords
 apply_boundary_read
 apply_rule

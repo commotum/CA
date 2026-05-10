@@ -1,9 +1,8 @@
-"""Template for component catalog and pipeline scaffolds.
+"""Reference template for CA catalog and pipeline scaffolds.
 
-This file is a reference shape for new `data/components/*.py` catalogs. It is
-not a runtime component. The goal is to make future scaffolds look and read like
-`alphabets.py`, `neighborhoods.py`, `frontiers.py`, and `rules.py` without
-needing to rediscover the project style.
+This file is reference material, not package runtime code. The goal is to make
+future CA catalogs look and read like `alphabets.py`, `neighborhoods.py`,
+`frontiers.py`, and `rules.py` without needing to rediscover the project style.
 
 Use this structure when adding a new component catalog:
 
@@ -38,14 +37,14 @@ Implementation style once a stub is ready:
 - Preserve user edits and unrelated work; keep each implementation scoped to
   the requested phase.
 
-For top-level pipeline modules, use the same ownership-first shape:
+For pipeline modules, use the same ownership-first shape:
 
-- `prepare.py` freezes deterministic source manifests, stream specs, and vocab
-  recipes.
-- `data/generate.py` rolls one already chosen seed state forward.
-- `data/tokenize.py` builds vocabularies and serializes one realized episode,
-  including token times, coordinates, next-state targets, and mask metadata.
-- `data/batch.py` realizes train/eval streams, filters rollouts at runtime, and
+- `ca.rollout` rolls one already chosen seed state forward from `Dynamics`.
+- PE preparation freezes deterministic source manifests, stream specs, and
+  vocab recipes.
+- PE tokenization serializes realized episodes, including token times,
+  coordinates, next-state targets, and mask metadata.
+- PE batching realizes train/eval streams, filters rollouts at runtime, and
   builds tensors, including dense state-causal attention masks.
 
 Those modules should start with a big-picture docstring, define a small public
@@ -97,7 +96,7 @@ def _not_implemented() -> None:
     helper makes placeholder behavior obvious and easy to find.
     """
 
-    raise NotImplementedError("scaffold.py is a component catalog template")
+    raise NotImplementedError("ca-scaffold.py is a component catalog template")
 
 
 # ---------------------------------------------------------------------------
@@ -110,8 +109,8 @@ def singular_primitive(value: int = 0) -> Component:
 
     Singular primitives should be built directly from the lower-level module
     this catalog depends on. For example, `neighborhoods.py` builds singular
-    read loci from `loci.py`; it does not ask `datasets.py` or `generate.py` to
-    help.
+    read loci from `loci.py`; it does not ask PE dataset code or `rollout.py`
+    to help.
 
     Implementation checklist:
 

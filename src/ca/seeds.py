@@ -14,8 +14,8 @@ The construction hierarchy mirrors `neighborhoods.py` and `frontiers.py`:
   predicates rather than duplicating selector logic.
 
 This keeps seed support construction separate from alphabets, rules, rollout,
-tokenization, and dataset assembly. `datasets.py` chooses which seed family is
-paired with each named dataset.
+tokenization, and dataset assembly. PE chooses which seed family is paired with
+each named dataset.
 """
 
 from __future__ import annotations

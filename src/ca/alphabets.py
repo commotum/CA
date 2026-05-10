@@ -7,10 +7,10 @@ not a vocabulary and does not assign token ids. It only defines the values a
 trajectory cell, symbol, register, or field may contain before tokenization or
 numerical handling.
 
-Token ids are assigned later by `data/tokenize.py`, which enumerates special
+Token ids are assigned later by PE tokenization, which enumerates special
 tokens first and then adds the alphabets required by the selected dataset
-configs. This keeps alphabet definitions reusable and prevents fixed global
-vocabulary constants from creeping into the component layer.
+manifests. This keeps alphabet definitions reusable and prevents fixed global
+vocabulary constants from creeping into the CA layer.
 
 Prefer parameterized alphabet families over named constants. Scalar numerical
 values use range alphabets, while binary cellular automata use the boolean

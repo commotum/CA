@@ -15,9 +15,9 @@ The construction hierarchy mirrors `neighborhoods.py`:
   duplicating component logic.
 
 This keeps spatial construction in neighborhoods/frontiers, value-space
-construction in alphabets, and rollout mechanics in `generate.py`. `datasets.py`
-chooses the alphabet, neighborhood, frontier, seed, boundary, shape, horizon,
-and named rule family.
+construction in alphabets, and rollout mechanics in `rollout.py`. PE chooses
+the alphabet, neighborhood, frontier, seed, boundary, shape, horizon, and named
+rule family.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ class Rule:
 
     `family` and `params` preserve the catalog recipe. `rule_id` identifies one
     concrete member of the family when applicable. `fn` stores the tiny callable
-    used by `generate.py` after instantiation.
+    used by `rollout.py` after instantiation.
     """
 
     family: str
@@ -85,7 +85,7 @@ def _not_implemented() -> None:
 def instantiate(rule: Rule, rule_id: int) -> Rule:
     """Instantiate one concrete callable from a rule family and `rule_id`.
 
-    `generate.py` should call this before rollout instead of decoding private
+    `rollout.py` should call this before rollout instead of decoding private
     rule-id semantics itself.
     """
 

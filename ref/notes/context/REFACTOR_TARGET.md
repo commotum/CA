@@ -335,6 +335,7 @@ ankos
     ├── notes
     │   ├── CA-Types.csv
     │   ├── CA-Types.md
+    │   ├── ca-scaffold.py
     │   ├── generator.md
     │   └── archived
     │       ├── V2.md
@@ -353,10 +354,12 @@ ankos
 ```text
 ankos
 └── tests
+    ├── test_boundary.py
     ├── test_loci.py
     ├── test_rng.py
     ├── test_rules.py
     ├── test_seeds.py
+    ├── test_specs.py
     └── test_rollout.py
 ```
 
@@ -368,6 +371,7 @@ ankos
 │   ├── notes
 │   │   ├── CA-Types.csv
 │   │   ├── CA-Types.md
+│   │   ├── ca-scaffold.py
 │   │   ├── generator.md
 │   │   └── archived
 │   │       ├── V2.md
@@ -428,10 +432,12 @@ ankos
 │       ├── rng.py
 │       └── rollout.py
 ├── tests
+│   ├── test_boundary.py
 │   ├── test_loci.py
 │   ├── test_rng.py
 │   ├── test_rules.py
 │   ├── test_seeds.py
+│   ├── test_specs.py
 │   └── test_rollout.py
 ├── pyproject.toml
 ├── uv.lock

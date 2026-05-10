@@ -1,29 +1,19 @@
-"""Pure next-state trajectory generation.
+"""Pure CA next-state trajectory rollout.
 
-`generate.py` has one narrow responsibility: roll an already chosen initial
-seed state forward under a resolved next-state update contract.
+This module evolves an already resolved CA setup forward under the Wolfram
+dynamical-update convention: current state `t` determines next state `t+1`.
 
-Inputs should be explicit and already resolved by callers such as
-`data.batch.py`:
+The public entry point accepts only the handoff contract inputs:
 
-- dataset/domain metadata,
-- native shape,
-- initial seed state or seed history,
-- instantiated rule or rule id plus rule family,
-- neighborhoods and frontier/update schedule,
-- boundary policy,
-- number of raw states to produce.
+- `Dynamics`: reusable raw CA mechanics,
+- `rule_id`: the concrete rule to instantiate,
+- `seed_state`: an already rendered raw seed state,
+- `steps`: the number of raw states to produce.
 
-Outputs should be raw native-dimensional trajectories, plus canonical
-coordinates when useful for downstream serialization. Generation follows the
-Wolfram dynamical-update convention: current state `t` determines next state
-`t+1`.
-
-This module should not choose train/eval splits, sample rule streams, sample
-seed streams, tokenize, pad, create labels, build batches, write manifests, or
-filter rules. Runtime sampling and rollout-based filtering belong to
-`data.batch.py`; representation and target construction belong to
-`data.tokenize.py`.
+Outputs are raw native-dimensional trajectories plus optional canonical
+`[t, x, y, z]` coordinates. This module does not choose train/eval splits,
+sample streams, render seed specs, tokenize, pad, create labels, build batches,
+write manifests, or manage device policy.
 """
 
 from __future__ import annotations
@@ -38,60 +28,9 @@ from . import loci, rules
 from .specs import Dynamics, RawEpisode
 
 
-def _not_implemented() -> None:
-    raise NotImplementedError("data.generate next-state scaffolding is not implemented yet")
-
-
 # ---------------------------------------------------------------------------
 # Phase 1 Public Surface
 # ---------------------------------------------------------------------------
-
-
-def generate_episode(
-    dataset_spec: Any,
-    initial_state: Any,
-    rule_id: int,
-    steps: int,
-    boundary: Mapping[str, Any] | None = None,
-) -> RawEpisode:
-    """Generate one deterministic raw episode from an already rendered seed state."""
-
-    steps = int(steps)
-    if steps < 2:
-        raise ValueError(f"steps must be at least 2 for next-state targets, got {steps}")
-
-    boundary = dict(getattr(dataset_spec, "boundary", {}) if boundary is None else boundary)
-    domain = str(dataset_spec.domain).lower()
-    spec_shape = getattr(dataset_spec, "shape", None)
-    if spec_shape is None:
-        shape = () if domain == "t+0d" else tuple(int(size) for size in np.asarray(initial_state).shape)
-    else:
-        shape = tuple(int(size) for size in spec_shape)
-
-    dynamics = Dynamics(
-        domain=domain,
-        shape=shape,
-        rule=dataset_spec.rule,
-        neighborhoods=dataset_spec.neighborhoods,
-        frontier=dataset_spec.frontier,
-        boundary=boundary,
-        metadata={"dataset_id": dataset_spec.id},
-    )
-    episode = rollout(
-        dynamics,
-        rule_id=int(rule_id),
-        seed_state=initial_state,
-        steps=steps,
-    )
-    return RawEpisode(
-        domain=episode.domain,
-        shape=episode.shape,
-        rule_id=episode.rule_id,
-        steps=episode.steps,
-        states=episode.states,
-        coords=episode.coords,
-        metadata={**dict(episode.metadata or {}), "dataset_id": dataset_spec.id},
-    )
 
 
 def rollout(
