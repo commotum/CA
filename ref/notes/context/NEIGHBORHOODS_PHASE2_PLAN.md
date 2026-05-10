@@ -18,7 +18,7 @@ Implement these functions:
 ```text
 literal_offsets(offsets, read_mode="compact", order="lex")
 history(time_offsets, read_mode="compact")
-radius(axes, metric, region, radius, time_offset=0, include_center=True, read_mode="compact")
+metric_radius(axes, metric, region, radius, time_offset=0, include_center=True, read_mode="compact")
 shell(axes, metric, radius, time_offset=0, read_mode="compact")
 directional_line(axis, values, time_offset=0, fixed=None)
 directional_fov(axes, reference, direction, aperture, radius, time_offset=0)
@@ -95,7 +95,7 @@ Tests:
 - Component selected coords are `[0,0,0,0]`, `[-1,0,0,0]`,
   `[-2,0,0,0]`.
 
-### `radius`
+### `metric_radius`
 
 Purpose: general metric filled/shell stencil over active spatial axes.
 
@@ -130,13 +130,13 @@ Purpose: convenience wrapper for metric shell neighborhoods.
 
 Implementation:
 
-- Delegate to `radius(..., region="shell", include_center=False)`.
-- Preserve name `"shell"` and params if useful, or return the `radius` result
+- Delegate to `metric_radius(..., region="shell", include_center=False)`.
+- Preserve name `"shell"` and params if useful, or return the `metric_radius` result
   with a wrapper name. Prefer explicit name `"shell"` for inspectability.
 
 Tests:
 
-- `shell(("x", "y"), "l1", 1)` matches `radius(..., region="shell",
+- `shell(("x", "y"), "l1", 1)` matches `metric_radius(..., region="shell",
   include_center=False)`.
 
 ### `directional_line`
@@ -205,14 +205,14 @@ Tests:
 
 Implemented aliases:
 
-- `eca(r=1, time_offset=0, include_center=True)` should call:
-  `radius(("x",), metric="linf", region="filled", radius=r,
+- `eca(radius=1, time_offset=0, include_center=True)` should call:
+  `metric_radius(("x",), metric="linf", region="filled", radius=radius,
   time_offset=time_offset, include_center=include_center)`.
-- `moore(axes=("x", "y"), r=1, ...)` should call
-  `radius(..., metric="linf", region="filled",
+- `moore(axes=("x", "y"), radius=1, ...)` should call
+  `metric_radius(..., metric="linf", region="filled",
   include_center=include_center)`.
-- `von_neumann(axes=("x", "y"), r=1, ...)` should call
-  `radius(..., metric="l1", region="filled",
+- `von_neumann(axes=("x", "y"), radius=1, ...)` should call
+  `metric_radius(..., metric="l1", region="filled",
   include_center=include_center)`.
 
 Important: `eca` is only the read neighborhood. The standard Wolfram ECA

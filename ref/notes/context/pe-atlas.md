@@ -377,7 +377,7 @@ Top-level surface:
 
 - aliases: `CombineMode`, `Metric`, `Region`
 - dataclass: `Neighborhood`
-- implemented factories: `self_at`, `axis_shell`, `l1_shell`, `change_count_shell`, `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`, `compose`, `literal_offsets`, `history`, `radius`, `shell`, `directional_line`, `directional_fov`, `eca`, `moore`, `von_neumann`
+- implemented factories: `self_at`, `axis_shell`, `l1_shell`, `change_count_shell`, `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`, `compose`, `literal_offsets`, `history`, `metric_radius`, `shell`, `directional_line`, `directional_fov`, `eca`, `moore`, `von_neumann`
 - future sketches: none in runtime
 
 Function notes:
@@ -461,7 +461,7 @@ Function notes:
 - `Seed` stores support selector, selected/fill values, distribution, family, params, and name.
 - `pair` returns a fixed scalar two-history seed.
 - `uniform_pair` samples scalar pair values at render time.
-- `bernoulli` defines stochastic binary initial-state support; unsupported support forms can become `None`.
+- `bernoulli` defines stochastic binary initial-state support over the initial slice or an explicit selector.
 - `selector_seed` fills selected coords with selected value.
 - `point`, `subspace`, `finite_segment`, `body`, `compound`, `region`, and `periodic` build selector-backed structured seeds.
 - `fractal` and `spiral` wrap callable predicates into seed params.
@@ -476,7 +476,7 @@ Notable mismatches:
 
 - This is runtime rendering code, not just catalog specs.
 - `dedupe` dedupes rendered tensors, not support masks.
-- `bernoulli` accepts mapping support by type but does not implement it.
+- Unsupported `bernoulli` support specs are rejected.
 - `path` accepts 4D points but only selects from `t=0`; `point` can use nonzero time.
 - Predicate/callable params may not be serializable.
 

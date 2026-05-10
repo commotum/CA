@@ -1,8 +1,9 @@
 """Tests for seed behavior."""
 
 import numpy as np
+import pytest
 
-from ca import seeds
+from ca import loci, seeds
 
 
 def test_pair_seed_renders_numpy_pair() -> None:
@@ -30,6 +31,29 @@ def test_bernoulli_seed_is_deterministic_with_rng() -> None:
     right = seeds.render(seed, (4,), rng=np.random.default_rng(123))
 
     assert left.tolist() == right.tolist()
+
+
+def test_bernoulli_rejects_unknown_support_specs() -> None:
+    with pytest.raises(ValueError):
+        seeds.bernoulli(support={"family": "initial_slice"})  # type: ignore[arg-type]
+
+
+def test_compound_rejects_non_seed_components() -> None:
+    with pytest.raises(TypeError):
+        seeds.compound(kind="plus", components=({"family": "point"},))  # type: ignore[list-item]
+
+
+def test_compound_rejects_components_without_support() -> None:
+    with pytest.raises(ValueError):
+        seeds.compound(kind="plus", components=(seeds.constant(1),))
+
+
+def test_compound_accepts_selector_backed_seed_components() -> None:
+    selector = loci.selector(loci.absolute_universe(loci.coordinate_space((3,)), t=0))
+    seed = seeds.selector_seed(selector)
+    compound = seeds.compound(kind="plus", components=(seed,))
+
+    assert compound.support is not None
 
 
 def test_structured_can_skip_dedupe() -> None:

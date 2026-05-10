@@ -174,7 +174,7 @@ def literal_offsets(
     )
 
 
-def radius(
+def metric_radius(
     axes: Sequence[str],
     metric: Metric,
     region: Region,
@@ -234,7 +234,7 @@ def radius(
 
     return Neighborhood(
         components=(component,),
-        name="radius",
+        name="metric_radius",
         params={
             "axes": axes,
             "metric": metric,
@@ -250,17 +250,17 @@ def radius(
 def shell(
     axes: Sequence[str],
     metric: Metric,
-    r: int = 1,
+    radius: int = 1,
     time_offset: int = 0,
     read_mode: str = "compact",
 ) -> Neighborhood:
     """Build an exact metric shell, excluding the center."""
 
-    neighborhood = radius(
+    neighborhood = metric_radius(
         axes=axes,
         metric=metric,
         region="shell",
-        radius=r,
+        radius=radius,
         time_offset=time_offset,
         include_center=False,
         read_mode=read_mode,
@@ -281,7 +281,7 @@ def axis_shell(axis: str, radius: int, time_offset: int = 0) -> Neighborhood:
     if radius <= 0:
         raise ValueError(f"radius must be positive, got {radius}")
 
-    neighborhood = shell((axis,), metric="linf", r=radius, time_offset=time_offset)
+    neighborhood = shell((axis,), metric="linf", radius=radius, time_offset=time_offset)
     return Neighborhood(
         components=neighborhood.components,
         combine=neighborhood.combine,
@@ -298,7 +298,7 @@ def l1_shell(
     """Read all offsets at exact Manhattan/L1 distance `radius`."""
 
     axes = _validate_axes(axes)
-    neighborhood = shell(axes, metric="l1", r=radius, time_offset=time_offset)
+    neighborhood = shell(axes, metric="l1", radius=radius, time_offset=time_offset)
     return Neighborhood(
         components=neighborhood.components,
         combine=neighborhood.combine,
@@ -549,7 +549,7 @@ def history(time_offsets: Sequence[int], read_mode: str = "compact") -> Neighbor
 
 
 def eca(
-    r: int = 1,
+    radius: int = 1,
     time_offset: int = 0,
     include_center: bool = True,
 ) -> Neighborhood:
@@ -559,11 +559,11 @@ def eca(
     `[left, self, right]`. Larger `r` values extend that filled 1D stencil.
     """
 
-    return radius(
+    return metric_radius(
         axes=("x",),
         metric="linf",
         region="filled",
-        radius=r,
+        radius=radius,
         time_offset=int(time_offset),
         include_center=include_center,
     )
@@ -571,7 +571,7 @@ def eca(
 
 def moore(
     axes: Sequence[str] = ("x", "y"),
-    r: int = 1,
+    radius: int = 1,
     time_offset: int = 0,
     include_center: bool = False,
 ) -> Neighborhood:
@@ -581,11 +581,11 @@ def moore(
     Moore neighborhood. In 3D, it is the 26-cell surrounding cube shell.
     """
 
-    return radius(
+    return metric_radius(
         axes=axes,
         metric="linf",
         region="filled",
-        radius=r,
+        radius=radius,
         time_offset=time_offset,
         include_center=include_center,
     )
@@ -593,7 +593,7 @@ def moore(
 
 def von_neumann(
     axes: Sequence[str] = ("x", "y"),
-    r: int = 1,
+    radius: int = 1,
     time_offset: int = 0,
     include_center: bool = False,
 ) -> Neighborhood:
@@ -604,11 +604,11 @@ def von_neumann(
     filled L1 metric region, optionally excluding the center.
     """
 
-    return radius(
+    return metric_radius(
         axes=axes,
         metric="l1",
         region="filled",
-        radius=r,
+        radius=radius,
         time_offset=time_offset,
         include_center=include_center,
     )

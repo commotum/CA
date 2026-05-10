@@ -181,7 +181,7 @@ def uniform_pair(value_count: int = 97, reject_zero_zero: bool = True) -> Seed:
 def bernoulli(
     p_low: float = 0.0,
     p_high: float = 1.0,
-    support: str | loci.Selector | Mapping[str, Any] = "initial_slice",
+    support: str | loci.Selector = "initial_slice",
 ) -> Seed:
     """Sample binary values over a seed support.
 
@@ -198,7 +198,7 @@ def bernoulli(
     elif isinstance(support, loci.Selector):
         support_selector = support
     else:
-        support_selector = None
+        raise ValueError("bernoulli support must be 'initial_slice' or a loci.Selector")
 
     return Seed(
         support=support_selector,
@@ -490,7 +490,7 @@ def body(
 
 def compound(
     kind: str,
-    components: Sequence[Seed | Mapping[str, Any]] | None = None,
+    components: Sequence[Seed] | None = None,
     axes: Sequence[str] | None = None,
     signs: Sequence[int] | None = None,
     extent: int | None = None,
@@ -505,7 +505,16 @@ def compound(
     extent = None if extent is None else int(extent)
 
     if components:
-        selectors = tuple(component.support for component in components if isinstance(component, Seed))
+        selectors = []
+        for component in components:
+            if not isinstance(component, Seed):
+                raise TypeError(
+                    f"compound components must be Seed instances, got {type(component).__name__}"
+                )
+            if component.support is None:
+                raise ValueError("compound components must have selector-backed support")
+            selectors.append(component.support)
+        selectors = tuple(selectors)
 
         def has_any_component(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
             result = np.zeros(coords.shape[0], dtype=bool)

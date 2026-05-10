@@ -48,8 +48,8 @@ def test_history_preserves_temporal_components() -> None:
     assert _coords(neighborhood, component=2) == [[-2, 0, 0, 0]]
 
 
-def test_radius_builds_eca_stencil() -> None:
-    neighborhood = neighborhoods.radius(
+def test_metric_radius_builds_eca_stencil() -> None:
+    neighborhood = neighborhoods.metric_radius(
         axes=("x",),
         metric="linf",
         region="filled",
@@ -64,7 +64,7 @@ def test_radius_builds_eca_stencil() -> None:
 
 
 def test_eca_alias_builds_standard_stencil() -> None:
-    neighborhood = neighborhoods.eca(r=2, time_offset=-1)
+    neighborhood = neighborhoods.eca(radius=2, time_offset=-1)
 
     assert neighborhood.params == {
         "axes": ("x",),
@@ -84,8 +84,8 @@ def test_eca_alias_builds_standard_stencil() -> None:
     ]
 
 
-def test_radius_builds_moore_without_center() -> None:
-    neighborhood = neighborhoods.radius(
+def test_metric_radius_builds_moore_without_center() -> None:
+    neighborhood = neighborhoods.metric_radius(
         axes=("x", "y"),
         metric="linf",
         region="filled",
@@ -106,7 +106,7 @@ def test_radius_builds_moore_without_center() -> None:
 
 
 def test_moore_alias_matches_linf_filled_without_center() -> None:
-    direct = neighborhoods.radius(
+    direct = neighborhoods.metric_radius(
         axes=("x", "y"),
         metric="linf",
         region="filled",
@@ -119,14 +119,14 @@ def test_moore_alias_matches_linf_filled_without_center() -> None:
     assert _coords(alias) == _coords(direct)
 
 
-def test_radius_builds_von_neumann_shells() -> None:
-    neighborhood_2d = neighborhoods.radius(
+def test_metric_radius_builds_von_neumann_shells() -> None:
+    neighborhood_2d = neighborhoods.metric_radius(
         axes=("x", "y"),
         metric="l1",
         region="shell",
         radius=1,
     )
-    neighborhood_3d = neighborhoods.radius(
+    neighborhood_3d = neighborhoods.metric_radius(
         axes=("x", "y", "z"),
         metric="l1",
         region="shell",
@@ -150,7 +150,7 @@ def test_radius_builds_von_neumann_shells() -> None:
 
 
 def test_von_neumann_alias_uses_filled_l1_region() -> None:
-    neighborhood = neighborhoods.von_neumann(r=2)
+    neighborhood = neighborhoods.von_neumann(radius=2)
 
     assert neighborhood.params == {
         "axes": ("x", "y"),
@@ -178,14 +178,14 @@ def test_von_neumann_alias_uses_filled_l1_region() -> None:
 
 
 def test_shell_matches_radius_shell_without_center() -> None:
-    direct = neighborhoods.radius(
+    direct = neighborhoods.metric_radius(
         axes=("x", "y"),
         metric="l1",
         region="shell",
         radius=1,
         include_center=False,
     )
-    wrapped = neighborhoods.shell(("x", "y"), metric="l1", r=1)
+    wrapped = neighborhoods.shell(("x", "y"), metric="l1", radius=1)
 
     assert _coords(wrapped) == _coords(direct)
     assert wrapped.name == "shell"

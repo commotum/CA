@@ -4,7 +4,7 @@ from . import alphabets, frontiers, loci, neighborhoods, rng, rules, seeds
 from .alphabets import Alphabet, boolean, float_range_alphabet, int_range_alphabet, symbolic
 from .frontiers import Frontier, time_slice
 from .neighborhoods import Neighborhood, ar2_0d, axis_shell, change_count_shell, directional_fov
-from .neighborhoods import directional_line, eca, history, l1_shell, literal_offsets, moore, radius
+from .neighborhoods import directional_line, eca, history, l1_shell, literal_offsets, metric_radius, moore
 from .neighborhoods import self_at, shell, von_neumann
 from .neighborhoods import dyadrads_1d as dyadrads_1d_neighborhood
 from .neighborhoods import dyadaxes_2d as dyadaxes_2d_neighborhood
@@ -56,13 +56,13 @@ __all__ = [
     "l1_shell",
     "literal_offsets",
     "loci",
+    "metric_radius",
     "moore",
     "neighborhoods",
     "numpy_rng",
     "pair",
     "point",
     "render",
-    "radius",
     "rng",
     "rollout",
     "rule_count",

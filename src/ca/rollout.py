@@ -38,12 +38,9 @@ def rollout(
     seed_state: Any,
     steps: int,
     *,
-    rng: Any | None = None,
     return_coords: bool = True,
 ) -> RawEpisode:
     """Roll CA dynamics forward and return a raw episode."""
-
-    del rng
 
     if not isinstance(dynamics, Dynamics):
         raise TypeError("rollout requires a ca.Dynamics instance")

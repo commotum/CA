@@ -602,7 +602,6 @@ def rollout(
     seed_state,
     steps,
     *,
-    rng=None,
     return_coords=True,
 ):
     ...
