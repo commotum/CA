@@ -25,7 +25,7 @@ PredicateFn = Callable[[Tensor, Mapping[str, Any]], Tensor]
 _CANONICAL_AXES = ("t", "x", "y", "z")
 _SPATIAL_AXES = ("x", "y", "z")
 _AXIS_COLUMNS = {"t": 0, "x": 1, "y": 2, "z": 3}
-_BOUNDARY_POLICIES = ("fixed", "periodic", "reflective", "clamp")
+_BOUNDARY_POLICIES = ("none", "fixed", "periodic", "reflective")
 
 
 @dataclass(frozen=True)
@@ -540,7 +540,12 @@ def gather(coords: Tensor, values: Tensor, boundary: Mapping[str, Any] | None = 
     if coords_arr.shape[-1:] != (4,):
         raise ValueError(f"coords must have final dimension 4, got {tuple(coords_arr.shape)}")
 
-    boundary = {} if boundary is None else boundary
+    boundary = {} if boundary is None else dict(boundary)
+    allowed_boundary_fields = {"policy", "value", "coordinate_space"}
+    extra_boundary_fields = set(boundary).difference(allowed_boundary_fields)
+    if extra_boundary_fields:
+        raise ValueError(f"unsupported boundary fields: {sorted(extra_boundary_fields)}")
+
     space = boundary.get("coordinate_space")
     if space is None and values_arr.ndim == 0:
         space = coordinate_space(())
@@ -549,11 +554,15 @@ def gather(coords: Tensor, values: Tensor, boundary: Mapping[str, Any] | None = 
     if not isinstance(space, CoordinateSpace):
         raise TypeError("boundary['coordinate_space'] must be a CoordinateSpace")
 
-    policy = boundary.get("policy", boundary.get("mode", boundary.get("type")))
-    policy = policy.lower() if isinstance(policy, str) else policy
-    if policy is not None and policy not in _BOUNDARY_POLICIES:
+    policy = boundary.get("policy", "none")
+    if not isinstance(policy, str):
+        raise TypeError(f"boundary policy must be a string, got {type(policy).__name__}")
+    policy = policy.lower()
+    if policy not in _BOUNDARY_POLICIES:
         raise ValueError(f"unknown boundary policy {policy!r}")
-    fill_value = boundary.get("value", boundary.get("fill_value", 0))
+    if policy != "fixed" and "value" in boundary:
+        raise ValueError("boundary field 'value' is only valid for fixed policy")
+    fill_value = boundary.get("value", 0)
 
     mapped = coords_arr.copy()
     valid = np.ones(coords_arr.shape[:-1], dtype=bool)
@@ -590,10 +599,6 @@ def gather(coords: Tensor, values: Tensor, boundary: Mapping[str, Any] | None = 
             reflected = np.where(reflected < size, reflected, period - reflected)
             mapped[..., col] = reflected + low
             continue
-        if policy == "clamp":
-            mapped[..., col] = np.clip(coord, low, high)
-            continue
-
         valid &= in_bounds
         mapped[..., col] = np.clip(coord, low, high)
 

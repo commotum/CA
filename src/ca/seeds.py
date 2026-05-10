@@ -194,14 +194,8 @@ def bernoulli(
     """
 
     if support == "initial_slice":
-        def initial_slice(context: Mapping[str, Any]) -> loci.Tensor:
-            space = context.get("coordinate_space")
-            if space is None:
-                space = loci.coordinate_space(context["shape"])
-            return loci.absolute_universe(space, t=0)
-
         support_selector = loci.selector(
-            initial_slice,
+            _initial_slice,
             order="none",
             frame="absolute",
         )
@@ -958,7 +952,7 @@ def structured(
     include_compounds: bool = True,
     include_regions: bool = True,
     include_periodic: bool = True,
-    dedupe: DedupeMode = "exact",
+    dedupe_mode: DedupeMode | None = "exact",
 ) -> list[Seed]:
     """Enumerate canonical structured seed specs.
 
@@ -1013,10 +1007,10 @@ def structured(
 
     specs.extend(transform(spec, invert=True) for spec in tuple(specs) if spec.support is not None)
 
-    if dedupe is None:
+    if dedupe_mode is None:
         return specs
 
-    return globals()["dedupe"](specs, shape, mode=dedupe)
+    return dedupe(specs, shape, mode=dedupe_mode)
 
 
 def constant(value: int) -> Seed:

@@ -30,3 +30,9 @@ def test_bernoulli_seed_is_deterministic_with_rng() -> None:
     right = seeds.render(seed, (4,), rng=np.random.default_rng(123))
 
     assert left.tolist() == right.tolist()
+
+
+def test_structured_can_skip_dedupe() -> None:
+    specs = seeds.structured((3,), dedupe_mode=None)
+
+    assert specs

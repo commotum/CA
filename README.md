@@ -46,7 +46,6 @@ ankos
         ├── frontiers.py
         ├── seeds.py
         ├── rules.py
-        ├── boundary.py
         ├── rng.py
         └── rollout.py
 ```
@@ -148,7 +147,6 @@ ankos
 │       ├── frontiers.py
 │       ├── seeds.py
 │       ├── rules.py
-│       ├── boundary.py
 │       ├── rng.py
 │       └── rollout.py
 ├── tests

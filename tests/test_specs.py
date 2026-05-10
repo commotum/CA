@@ -43,7 +43,7 @@ def test_dynamics_from_spec_accepts_plural_neighborhood_specs() -> None:
         "rule": "dyadrads_1d",
         "neighborhoods": [{"family": "dyadrads_1d"}],
         "frontier": "time_slice",
-        "boundary": "periodic",
+        "boundary": {"policy": "periodic"},
     }
 
     dynamics = ca.dynamics_from_spec(spec)

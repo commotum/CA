@@ -17,7 +17,6 @@ def test_ar2_rollout_returns_raw_episode() -> None:
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
         frontier=frontiers.time_slice(()),
-        boundary={},
     )
 
     episode = ca.rollout(
@@ -130,7 +129,6 @@ def test_rollout_can_skip_coord_materialization() -> None:
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
         frontier=frontiers.time_slice(()),
-        boundary={},
     )
 
     episode = ca.rollout(
@@ -144,17 +142,29 @@ def test_rollout_can_skip_coord_materialization() -> None:
     assert episode.coords is None
 
 
-def test_dynamics_normalizes_boundary_policy() -> None:
+def test_dynamics_normalizes_boundary_mapping() -> None:
     dynamics = ca.Dynamics(
         domain="t+1d",
         shape=(3,),
         rule=rules.dyadrads_1d(),
         neighborhoods=(neighborhoods.dyadrads_1d(),),
         frontier=frontiers.time_slice((3,)),
-        boundary="periodic",
+        boundary={"policy": "periodic"},
     )
 
     assert dynamics.boundary == {"policy": "periodic"}
+
+
+def test_dynamics_rejects_legacy_boundary_string() -> None:
+    with pytest.raises(TypeError, match="boundary must be a mapping"):
+        ca.Dynamics(
+            domain="t+1d",
+            shape=(3,),
+            rule=rules.dyadrads_1d(),
+            neighborhoods=(neighborhoods.dyadrads_1d(),),
+            frontier=frontiers.time_slice((3,)),
+            boundary="periodic",  # type: ignore[arg-type]
+        )
 
 
 def test_rollout_rejects_unsupported_frontier() -> None:
@@ -164,7 +174,6 @@ def test_rollout_rejects_unsupported_frontier() -> None:
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
         frontier=SimpleNamespace(family="partial"),
-        boundary={},
     )
 
     with pytest.raises(NotImplementedError):
@@ -202,7 +211,6 @@ def test_rollout_rejects_domain_shape_mismatch_before_coord_materialization() ->
         rule=rules.ar2_modular_0d(modulus=97),
         neighborhoods=(),
         frontier=frontiers.time_slice((3,)),
-        boundary={},
     )
 
     with pytest.raises(ValueError, match="requires spatial rank"):

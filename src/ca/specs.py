@@ -8,10 +8,16 @@ from typing import Any
 
 import numpy as np
 
-from . import boundary as boundary_lib
 from . import frontiers as frontiers_lib
 from . import neighborhoods as neighborhoods_lib
 from . import rules as rules_lib
+
+
+_BOUNDARY_POLICIES = ("none", "fixed", "periodic", "reflective")
+
+
+def _none_boundary() -> dict[str, Any]:
+    return {"policy": "none"}
 
 
 @dataclass(frozen=True)
@@ -27,7 +33,7 @@ class Dynamics:
     rule: Any
     neighborhoods: tuple[Any, ...]
     frontier: Any
-    boundary: Mapping[str, Any] = field(default_factory=boundary_lib.none)
+    boundary: Mapping[str, Any] = field(default_factory=_none_boundary)
     metadata: Mapping[str, Any] | None = None
 
     def __init__(
@@ -37,7 +43,7 @@ class Dynamics:
         rule: Any,
         neighborhoods: Sequence[Any],
         frontier: Any,
-        boundary: Mapping[str, Any] | str | None = None,
+        boundary: Mapping[str, Any] | None = None,
         metadata: Mapping[str, Any] | None = None,
     ) -> None:
         object.__setattr__(self, "domain", str(domain).lower())
@@ -45,7 +51,7 @@ class Dynamics:
         object.__setattr__(self, "rule", rule)
         object.__setattr__(self, "neighborhoods", tuple(neighborhoods))
         object.__setattr__(self, "frontier", frontier)
-        object.__setattr__(self, "boundary", boundary_lib.normalize(boundary))
+        object.__setattr__(self, "boundary", _normalize_boundary(boundary))
         object.__setattr__(self, "metadata", None if metadata is None else dict(metadata))
 
 
@@ -195,6 +201,34 @@ def _params(spec: Mapping[str, Any]) -> dict[str, Any]:
         if key not in {"family", "params", "rule_count"}:
             params.setdefault(key, value)
     return params
+
+
+def _normalize_boundary(boundary: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    if boundary is None:
+        return _none_boundary()
+    if not isinstance(boundary, Mapping):
+        raise TypeError(f"boundary must be a mapping or None, got {type(boundary).__name__}")
+
+    spec = dict(boundary)
+    policy = spec.get("policy")
+    if not isinstance(policy, str) or not policy:
+        raise ValueError("boundary requires non-empty string field 'policy'")
+
+    policy = policy.lower()
+    if policy not in _BOUNDARY_POLICIES:
+        raise ValueError(f"unknown boundary policy {policy!r}")
+
+    allowed = {"policy"}
+    out: dict[str, Any] = {"policy": policy}
+    if policy == "fixed":
+        allowed.add("value")
+        out["value"] = spec.get("value", 0)
+
+    extra = set(spec).difference(allowed)
+    if extra:
+        raise ValueError(f"unsupported boundary fields: {sorted(extra)}")
+
+    return out
 
 
 __all__ = [

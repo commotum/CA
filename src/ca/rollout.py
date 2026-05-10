@@ -23,7 +23,6 @@ from typing import Any
 
 import numpy as np
 
-from . import boundary as boundary_lib
 from . import loci, rules
 from .specs import Dynamics, RawEpisode
 
@@ -153,16 +152,6 @@ def _validate_domain_shape(domain: str, shape: tuple[int, ...]) -> None:
         )
 
 
-def apply_boundary_read(
-    state: Any,
-    coord: Sequence[int],
-    boundary: Mapping[str, Any],
-) -> Any:
-    """Resolve one read coordinate according to the spatial boundary policy."""
-
-    return boundary_lib.apply_boundary_read(state, coord, boundary)
-
-
 def apply_rule(rule: Any, reads: Sequence[Any], rule_id: int) -> Any:
     """Apply one instantiated or decodable next-state rule to gathered reads."""
 
@@ -269,7 +258,7 @@ def _read_component(
 
     query_coords = current_coords[:, None, :] + offsets[None, :, :]
     boundary = {**dict(boundary), "coordinate_space": space}
-    gathered = boundary_lib.gather(
+    gathered = loci.gather(
         query_coords.reshape(-1, 4),
         np.expand_dims(state, axis=0),
         boundary,

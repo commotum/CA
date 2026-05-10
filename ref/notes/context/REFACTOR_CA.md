@@ -112,7 +112,6 @@ by the target layout:
 
 ```text
 ankos/src/ca/specs.py
-ankos/src/ca/boundary.py
 ankos/src/ca/rng.py
 ankos/src/ca/rollout.py
 ankos/src/ca/__init__.py
@@ -132,10 +131,9 @@ ankos/src/ca/specs.py
   old/data/components/rules.py: Rule and RuleChannel shape
   old/data/components/loci.py: CoordinateSpace / Selector / Selection shape
 
-ankos/src/ca/boundary.py
+ankos/src/ca/loci.py
   old/data/components/loci.py: _BOUNDARY_POLICIES
   old/data/components/loci.py: gather policy mechanics
-  old/data/generate.py: apply_boundary_read
   old/data/generate.py: _read_component boundary setup
   old/data/generate.py: boundary metadata on Episode
 
@@ -158,8 +156,9 @@ pe/components/evals.py or pe/data/datasets.py, depending on policy ownership
 ```
 
 Do not preserve a reverse-compatibility boundary path as a target. The target is
-direct ownership: `ca.boundary` implements boundary mechanics, `ca.loci`
-provides coordinate/index helpers, and PE owns boundary selection policy.
+direct ownership: `ca.loci.gather()` implements boundary read mechanics,
+`ca.Dynamics.boundary` carries the strict boundary spec, and PE owns boundary
+selection policy.
 
 ## Target Repo Boundaries
 
@@ -187,7 +186,6 @@ ankos
 │       ├── frontiers.py
 │       ├── seeds.py
 │       ├── rules.py
-│       ├── boundary.py
 │       ├── rng.py
 │       └── rollout.py
 ├── ref
@@ -526,27 +524,19 @@ all supported Phase 1 families.
 Do not put train/eval rule-pool splitting in `ca.rules`. `ca.rules` knows which
 rule ids exist. PE decides which ids are train, eval, held out, or sampled.
 
-### `ankos/src/ca/boundary.py`
+### Boundary Mechanics
 
-Centralize boundary handling here.
+Boundary mechanics are centralized in `ankos/src/ca/loci.py`, specifically
+`loci.gather()`. Do not add a separate `boundary.py` wrapper module unless a
+future API need clearly justifies it.
 
-Supported Phase 1 policies:
+Supported Phase 1 policies in strict boundary specs:
 
 ```text
 none
 fixed
 periodic
 reflective
-```
-
-Useful surface:
-
-```text
-none()
-fixed(value=0)
-periodic()
-reflective()
-apply_boundary_read(...)
 ```
 
 For default PE datasets:
@@ -634,7 +624,6 @@ Move these old `data/generate.py` concepts here:
 Episode / RawEpisode dataclass
 rollout
 canonical_coords
-apply_boundary_read
 apply_rule
 _rollout_ar2
 _rollout_spatial_lookup
@@ -693,7 +682,6 @@ Example export categories:
 ```text
 spec dataclasses
 supported alphabet factories
-supported boundary factories
 supported neighborhood factories
 time_slice
 supported seed factories and render()
@@ -1158,7 +1146,6 @@ Create or normalize:
 
 ```text
 ankos/src/ca/specs.py
-ankos/src/ca/boundary.py
 ankos/src/ca/rng.py
 ankos/src/ca/rollout.py
 ankos/src/ca/__init__.py
@@ -1170,7 +1157,7 @@ Immediately fix these old ambiguities:
 ```text
 frontier must be enforced or rejected by rollout
 Phase 1 rule instantiation must be executable
-boundary handling should be centralized
+boundary read mechanics should be centralized in loci.gather()
 manifest-facing specs must be JSON-safe
 domain strings should be lowercase
 public rollout arrays should use NumPy semantics, not torch tensors
