@@ -26,7 +26,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
-import torch
+import numpy as np
 
 from . import loci
 
@@ -57,6 +57,14 @@ class Seed:
 
 def _not_implemented() -> None:
     raise NotImplementedError("seeds.py currently contains catalog specs only")
+
+
+def _as_rng(rng: Any | None) -> np.random.Generator:
+    if isinstance(rng, np.random.Generator):
+        return rng
+    if rng is None:
+        return np.random.default_rng()
+    return np.random.default_rng(rng)
 
 
 def _initial_slice(context: Mapping[str, Any]) -> loci.Tensor:
@@ -367,12 +375,12 @@ def finite_segment(
             center["z"] + offset * direction_values.get("z", 0),
         ])
 
-    allowed = torch.tensor(points, dtype=torch.long)
+    allowed = np.asarray(points, dtype=np.int64)
 
     def on_segment(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
         projected = loci.axis_project(coords, ("x", "y", "z"))
-        matches = projected[:, None, :] == allowed.to(projected.device)[None, :, :]
-        return matches.all(dim=-1).any(dim=-1)
+        matches = projected[:, None, :] == allowed[None, :, :]
+        return matches.all(axis=-1).any(axis=-1)
 
     support = loci.selector(
         _initial_slice,
@@ -418,20 +426,15 @@ def body(
 
         if metric == "linf":
             projected = loci.axis_project(coords, axes)
-            center_values = torch.tensor(
-                [center[axis] for axis in axes],
-                dtype=projected.dtype,
-                device=projected.device,
-            )
+            center_values = np.asarray([center[axis] for axis in axes], dtype=projected.dtype)
             relative = projected - center_values
-            extent_values = torch.tensor(
+            extent_values = np.asarray(
                 [int(extents.get(axis, radius)) if extents else radius for axis in axes],
                 dtype=projected.dtype,
-                device=projected.device,
             )
-            abs_relative = relative.abs()
-            within = (abs_relative <= extent_values).all(dim=-1)
-            boundary_axes = (abs_relative == extent_values).sum(dim=-1)
+            abs_relative = np.abs(relative)
+            within = (abs_relative <= extent_values).all(axis=-1)
+            boundary_axes = (abs_relative == extent_values).sum(axis=-1)
 
             if stratum == "volume":
                 return within
@@ -455,13 +458,9 @@ def body(
             shell = distances == radius
 
         projected = loci.axis_project(coords, axes)
-        center_values = torch.tensor(
-            [center[axis] for axis in axes],
-            dtype=projected.dtype,
-            device=projected.device,
-        )
+        center_values = np.asarray([center[axis] for axis in axes], dtype=projected.dtype)
         relative = projected - center_values
-        nonzero_axes = (relative != 0).sum(dim=-1)
+        nonzero_axes = (relative != 0).sum(axis=-1)
         zero_axes = len(axes) - nonzero_axes
 
         if stratum == "shell":
@@ -519,12 +518,14 @@ def compound(
         selectors = tuple(component.support for component in components if isinstance(component, Seed))
 
         def has_any_component(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
-            result = torch.zeros(coords.shape[0], dtype=torch.bool, device=coords.device)
+            result = np.zeros(coords.shape[0], dtype=bool)
             for selector in selectors:
                 selection = loci.select(selector, context)
                 selected = selection.coords
-                matches = coords[:, None, :] == selected.to(coords.device)[None, :, :]
-                result = result | matches.all(dim=-1).any(dim=-1)
+                if selected is None or selected.size == 0:
+                    continue
+                matches = coords[:, None, :] == selected[None, :, :]
+                result = result | matches.all(axis=-1).any(axis=-1)
             return result
 
         support = loci.selector(
@@ -536,25 +537,25 @@ def compound(
     else:
         def compound_predicate(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
             projected = loci.axis_project(coords, axes)
-            abs_projected = projected.abs()
+            abs_projected = np.abs(projected)
 
             if extent is not None:
-                in_extent = (abs_projected <= extent).all(dim=-1)
+                in_extent = (abs_projected <= extent).all(axis=-1)
             else:
-                in_extent = torch.ones(projected.shape[0], dtype=torch.bool, device=projected.device)
+                in_extent = np.ones(projected.shape[0], dtype=bool)
 
             if kind in ("axial-star", "plus"):
-                return in_extent & ((projected != 0).sum(dim=-1) <= 1)
+                return in_extent & ((projected != 0).sum(axis=-1) <= 1)
 
             if kind in ("diagonal-star", "x"):
                 if signs is None:
-                    return in_extent & (abs_projected == abs_projected[:, :1]).all(dim=-1)
+                    return in_extent & (abs_projected == abs_projected[:, :1]).all(axis=-1)
 
-                sign_values = torch.tensor(signs, dtype=projected.dtype, device=projected.device)
+                sign_values = np.asarray(signs, dtype=projected.dtype)
                 signed = projected * sign_values
-                return in_extent & (signed == signed[:, :1]).all(dim=-1)
+                return in_extent & (signed == signed[:, :1]).all(axis=-1)
 
-            return torch.zeros(projected.shape[0], dtype=torch.bool, device=projected.device)
+            return np.zeros(projected.shape[0], dtype=bool)
 
         support = loci.selector(
             _initial_slice,
@@ -628,7 +629,7 @@ def region(
             values = loci.axis_project(coords, (axis,)).squeeze(-1)
             return values == int(coord)
 
-        return torch.zeros(coords.shape[0], dtype=torch.bool, device=coords.device)
+        return np.zeros(coords.shape[0], dtype=bool)
 
     support = loci.selector(
         _initial_slice,
@@ -674,15 +675,15 @@ def periodic(
             return loci.mod_eq(loci.sum_axes(coords, axes), step, phase)
 
         projected = loci.axis_project(coords, axes)
-        hits = torch.remainder(projected - phase, step) == 0
+        hits = np.remainder(projected - phase, step) == 0
 
         if kind in ("product-lattice", "sparse-lattice"):
-            return hits.all(dim=-1)
+            return hits.all(axis=-1)
 
         if kind == "grid-lattice":
-            return hits.any(dim=-1)
+            return hits.any(axis=-1)
 
-        return torch.zeros(coords.shape[0], dtype=torch.bool, device=coords.device)
+        return np.zeros(coords.shape[0], dtype=bool)
 
     support = loci.selector(
         _initial_slice,
@@ -777,14 +778,14 @@ def path(
             coords[index] = value
         canonical_points.append(tuple(coords))
 
-    point_tensor = torch.tensor(canonical_points, dtype=torch.long)
+    point_tensor = np.asarray(canonical_points, dtype=np.int64)
     thickness = int(thickness)
 
     def path_predicate(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
-        deltas = coords[:, None, :] - point_tensor.to(coords.device)[None, :, :]
-        distances = deltas[:, :, 1:].abs().max(dim=-1).values
+        deltas = coords[:, None, :] - point_tensor[None, :, :]
+        distances = np.abs(deltas[:, :, 1:]).max(axis=-1)
         same_time = deltas[:, :, 0] == 0
-        return (same_time & (distances <= thickness)).any(dim=-1)
+        return (same_time & (distances <= thickness)).any(axis=-1)
 
     support = loci.selector(
         _initial_slice,
@@ -831,8 +832,10 @@ def transform(
     def transformed_predicate(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
         selection = loci.select(seed.support, context)
         selected = selection.coords
-        matches = coords[:, None, :] == selected.to(coords.device)[None, :, :]
-        mask = matches.all(dim=-1).any(dim=-1)
+        if selected is None or selected.size == 0:
+            return np.ones(coords.shape[0], dtype=bool)
+        matches = coords[:, None, :] == selected[None, :, :]
+        mask = matches.all(axis=-1).any(axis=-1)
 
         return ~mask
 
@@ -873,33 +876,34 @@ def render(seed: Seed, shape: Sequence[int], rng: Any | None = None) -> Any:
     """
 
     shape = tuple(int(size) for size in shape)
+    rng = _as_rng(rng)
 
     if seed.family == "pair":
         params = seed.params or {}
-        return torch.tensor((params["x0"], params["x1"]), dtype=torch.long)
+        return np.asarray((params["x0"], params["x1"]), dtype=np.int64)
 
     if seed.family == "uniform_pair":
         params = seed.params or {}
         value_count = int(params["value_count"])
 
         while True:
-            values = torch.randint(value_count, (2,), generator=rng, dtype=torch.long)
+            values = rng.integers(value_count, size=2, dtype=np.int64)
             if not params["reject_zero_zero"] or bool(values.any()):
                 return values
 
     value = seed.fill_value if seed.selected_value is None else seed.selected_value
-    output = torch.full(shape, int(value), dtype=torch.long)
+    output = np.full(shape, int(value), dtype=np.int64)
 
     if seed.support is None:
         return output
 
-    output = torch.full(shape, int(seed.fill_value), dtype=torch.long)
+    output = np.full(shape, int(seed.fill_value), dtype=np.int64)
     space = loci.coordinate_space(shape)
     context = {"shape": shape, "coordinate_space": space}
     selection = loci.select(seed.support, context)
     selected = selection.coords
 
-    if selected is None or selected.numel() == 0:
+    if selected is None or selected.size == 0:
         return output
 
     indices = loci.native_indices(selected, space)
@@ -907,8 +911,8 @@ def render(seed: Seed, shape: Sequence[int], rng: Any | None = None) -> Any:
     if seed.distribution and seed.distribution.get("family") == "bernoulli":
         p_low = float(seed.distribution["p_low"])
         p_high = float(seed.distribution["p_high"])
-        p = p_low + (p_high - p_low) * float(torch.rand((), generator=rng))
-        samples = (torch.rand(shape, generator=rng) < p).long()
+        p = p_low + (p_high - p_low) * float(rng.random())
+        samples = (rng.random(shape) < p).astype(np.int64)
         output[indices] = samples[indices]
         return output
 
@@ -931,7 +935,7 @@ def dedupe(
 
     for spec in specs:
         rendered = render(spec, shape)
-        key = rendered.cpu().contiguous().numpy().tobytes()
+        key = np.ascontiguousarray(rendered).tobytes()
 
         if key in seen:
             continue

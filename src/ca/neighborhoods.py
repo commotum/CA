@@ -33,6 +33,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
+import numpy as np
+
 from . import loci
 
 
@@ -122,7 +124,7 @@ def axis_shell(axis: str, radius: int, time_offset: int = 0) -> Neighborhood:
 
     def is_shell_point(coords: loci.Tensor, context: Mapping[str, Any]) -> loci.Tensor:
         projected = loci.axis_project(coords, (axis,))
-        return projected.squeeze(-1).abs() == radius
+        return np.abs(projected.squeeze(-1)) == radius
 
     universe = loci.offset_universe(
         time_offsets=(time_offset,),
