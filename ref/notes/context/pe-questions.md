@@ -38,7 +38,7 @@ These are clarification questions that materially affect cleanup/refactor choice
 
 ## `data/components/neighborhoods.py`
 
-- Should `combine="merge"` become real selector merging/deduplication, or remain metadata for downstream consumers?
+- Should explicit support-algebra helpers such as union/intersection/difference be added for merged read loci?
 - Should “shell” APIs reject `radius=0` and center-including counts, or is center-as-radius-zero intended?
 - Are Phase 2/3 stubs public planned API that should remain importable, or should unfinished names be hidden until implemented?
 

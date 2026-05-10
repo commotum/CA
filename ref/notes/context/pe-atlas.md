@@ -400,11 +400,10 @@ Function notes:
 - `dyadrads_1d` composes self, radius-1 x-shell, and radius-2 x-shell.
 - `dyadaxes_2d` composes self, cardinal L1 shell, and diagonal change-count shell.
 - `dyadaxes_3d` composes self, face L1 shell, and edge/corner change-count shell.
-- `compose` flattens component tuples and records combine metadata.
+- `compose` flattens component tuples while preserving tuple-style component boundaries.
 
 Notable mismatches:
 
-- `combine="merge"` is only metadata; no selector merging/deduplication occurs.
 - Composing compound neighborhoods loses one nesting level.
 - Some “shell” APIs allow center/radius-zero behavior.
 - Spatial factories accept arbitrary time offsets, including future-positive values.

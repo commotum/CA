@@ -38,7 +38,7 @@ import numpy as np
 from . import loci
 
 
-CombineMode = Literal["tuple", "merge"]
+CombineMode = Literal["tuple"]
 Metric = Literal["l1", "l2", "linf"]
 Region = Literal["filled", "shell"]
 
@@ -378,23 +378,13 @@ def dyadaxes_3d(time_offset: int = 0) -> Neighborhood:
     )
 
 
-def compose(
-    components: Sequence[Neighborhood],
-    combine: CombineMode = "tuple",
-) -> Neighborhood:
+def compose(components: Sequence[Neighborhood]) -> Neighborhood:
     """Compose singular or already-structured neighborhoods.
 
-    With `combine="tuple"`, component boundaries are preserved. This is the
-    default for Dyadrads, Dyadaxes, and temporal-memory neighborhoods because
-    downstream rules need to know which values came from which read group.
-
-    `combine="merge"` may be used for later families that intentionally flatten
-    multiple supports into one read locus, but Phase 1 composites should prefer
-    tuple-preserving composition.
+    Component boundaries are preserved. This matters for Dyadrads, Dyadaxes,
+    and temporal-memory neighborhoods because downstream rules need to know
+    which values came from which read group.
     """
-
-    if combine not in ("tuple", "merge"):
-        raise ValueError(f"combine must be 'tuple' or 'merge', got {combine!r}")
 
     if not components:
         raise ValueError("components cannot be empty")
@@ -405,7 +395,7 @@ def compose(
 
     return Neighborhood(
         components=tuple(selectors),
-        combine=combine,
+        combine="tuple",
         name="compose",
         params={"component_count": len(components)},
     )

@@ -426,8 +426,9 @@ dyadaxes_3d:
   edge/corner shell
 ```
 
-`combine="merge"` may remain metadata for Phase 1 unless rollout depends on
-real selector merging.
+`compose()` preserves component boundaries. Merged/unioned neighborhood
+supports should be added later as an explicit support-algebra operation, not as
+metadata on `compose()`.
 
 ### `ankos/src/ca/frontiers.py`
 
