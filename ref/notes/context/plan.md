@@ -168,7 +168,7 @@ Goal: make PE consume `ankos` through the documented contract.
 
 Steps:
 
-- Build `ca.WorldSpec` values from dataset manifests/preparation scripts.
+- Build `ca.Dynamics` values from dataset manifests/preparation scripts.
 - Derive episode RNGs and rule ids from PE stream policy.
 - Render seed states through `ca`.
 - Call `ca.rollout()` from `components/batch.py`.

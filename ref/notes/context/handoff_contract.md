@@ -7,7 +7,7 @@ It is subordinate to `context/REFACTOR_TARGET.md`.
 
 ```text
 PE manifest / stream policy
-  -> ca.WorldSpec + rule_id + seed_state + steps
+  -> ca.Dynamics + rule_id + seed_state + steps
   -> ca.rollout(...)
   -> ca.RawEpisode
   -> pe/components/tokenizer.py
@@ -21,10 +21,10 @@ movement.
 
 ## PE To `ankos`
 
-PE passes only raw-world inputs into `ca`:
+PE passes only raw dynamics inputs into `ca`:
 
 ```text
-world: ca.WorldSpec
+dynamics: ca.Dynamics
 rule_id: int
 seed_state: np.ndarray-like
 steps: int
@@ -32,19 +32,21 @@ rng: optional NumPy-compatible RNG or seed
 return_coords: bool
 ```
 
-`ca.WorldSpec` is the normalized form of the old dataset catalog facts:
+`ca.Dynamics` is the normalized reusable CA system passed by PE. It contains
+only the mechanics needed to evolve raw states:
 
 ```text
-dataset_id: PE-side identity, not required by ca rollout
 domain: t+0d | t+1d | t+2d | t+3d
 shape: spatial shape only
-alphabet: raw value space
 neighborhood: source-relative read structure
 frontier: Phase 1 full_next_slice
-rule: rule family and rule count
-seed: seed family/spec
+rule: rule family/mechanics
 boundary: none | fixed | periodic | reflective
 ```
+
+`Dynamics` deliberately does not contain the per-episode `seed_state`,
+`rule_id`, or `steps`. Those are passed separately so PE can reuse the same
+dynamics across many stream episodes.
 
 PE keeps these out of `ca`:
 
@@ -130,15 +132,15 @@ From old `data/components/datasets.py`:
 
 ```text
 DatasetSpec.id        -> PE dataset_id / manifest identity
-DatasetSpec.domain    -> ca.WorldSpec.domain
-DatasetSpec.shape     -> ca.WorldSpec.shape
-DatasetSpec.alphabet  -> ca.WorldSpec.alphabet
-neighborhoods         -> ca.WorldSpec.neighborhood
-frontier              -> ca.WorldSpec.frontier
-rule                  -> ca.WorldSpec.rule
-seeds                 -> ca.WorldSpec.seed or PE stream seed choices
-boundary              -> ca.WorldSpec.boundary
-params                -> PE manifest metadata, unless raw-world specific
+DatasetSpec.domain    -> ca.Dynamics.domain
+DatasetSpec.shape     -> ca.Dynamics.shape
+DatasetSpec.alphabet  -> PE manifest/vocab metadata, not rollout dynamics
+neighborhoods         -> ca.Dynamics.neighborhood
+frontier              -> ca.Dynamics.frontier
+rule                  -> ca.Dynamics.rule
+seeds                 -> rendered seed_state or PE stream seed choices
+boundary              -> ca.Dynamics.boundary
+params                -> PE manifest metadata, unless raw-dynamics specific
 ```
 
 From old `data/generate.py`:
@@ -158,7 +160,7 @@ Episode.metadata -> RawEpisode.metadata
 `ca.rollout()` must enforce the executable frontier:
 
 ```python
-if world.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "full_next_slice":
     raise NotImplementedError(
         "ankos Phase 1 supports only full_next_slice rollout"
     )

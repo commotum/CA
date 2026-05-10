@@ -123,7 +123,7 @@ Detailed source lookup for the normalized modules:
 
 ```text
 ankos/src/ca/specs.py
-  old/data/components/datasets.py: DatasetSpec shape and world fields
+  old/data/components/datasets.py: DatasetSpec shape and dynamics fields
   old/data/generate.py: Episode runtime result shape
   old/data/components/alphabets.py: Alphabet shape
   old/data/components/neighborhoods.py: Neighborhood shape
@@ -200,7 +200,7 @@ ankos
 `ankos` owns this question:
 
 ```text
-Given a procedural world spec, rule id, seed state, shape, boundary, and step
+Given reusable CA dynamics, a rule id, seed state, and step
 count, what raw trajectory is generated?
 ```
 
@@ -301,7 +301,7 @@ NeighborhoodSpec
 FrontierSpec
 SeedSpec
 RuleSpec
-WorldSpec
+Dynamics
 RawEpisode
 ```
 
@@ -447,7 +447,7 @@ The target module is still named `frontiers.py`, but Phase 1 rollout should
 reject unsupported frontier families:
 
 ```python
-if world.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "full_next_slice":
     raise NotImplementedError(...)
 ```
 
@@ -592,21 +592,21 @@ The rename is intentional:
 
 ```text
 generate.py  old PE-local name
-rollout.py   CA-library name for evolving one world forward
+rollout.py   CA-library name for evolving one dynamics setup forward
 ```
 
 This module owns raw next-state trajectory generation. It answers:
 
 ```text
-Given a CA world, seed state, rule id, and step count, what raw trajectory does
-this world produce?
+Given CA dynamics, seed state, rule id, and step count, what raw trajectory is
+generated?
 ```
 
 Useful surface:
 
 ```python
 def rollout(
-    world,
+    dynamics,
     rule_id,
     seed_state,
     steps,
@@ -662,7 +662,7 @@ rollout must not silently do that. Phase 1 supports only full-next-slice
 synchronous rollout:
 
 ```python
-if world.frontier.family != "full_next_slice":
+if dynamics.frontier.family != "full_next_slice":
     raise NotImplementedError(
         "ankos Phase 1 supports only full_next_slice rollout"
     )
@@ -765,7 +765,7 @@ Each prepare script should define:
 dataset id
 domain
 shape
-CA WorldSpec
+CA Dynamics
 source-state count
 raw-state count
 default boundary
@@ -920,7 +920,7 @@ compile-prefix cleanup
 weight-only loading
 ```
 
-It should not know how to build CA worlds, tokenizers, PE caches, or data
+It should not know how to build CA dynamics, tokenizers, PE caches, or data
 streams.
 
 ## PE Configs And Entrypoints
@@ -971,7 +971,7 @@ data/<dataset>/manifest
 
 ### `manifest.json`
 
-Source identity and CA world spec.
+Source identity and CA dynamics.
 
 Recommended contents:
 
@@ -983,16 +983,16 @@ Recommended contents:
   "shape": [11, 11],
   "source_states_per_episode": 16,
   "raw_states_per_episode": 17,
-  "world": {
-    "alphabet": {"family": "boolean", "values": [0, 1]},
+  "alphabet": {"family": "boolean", "values": [0, 1]},
+  "seed": {"family": "bernoulli", "params": {"p": 0.5}},
+  "dynamics": {
     "neighborhood": {"family": "dyadaxes_2d"},
     "frontier": {"family": "full_next_slice"},
     "rule": {"family": "dyadaxes_2d", "rule_count": 256},
-    "seed": {"family": "bernoulli", "params": {"p": 0.5}},
     "boundary": {"policy": "fixed", "value": 0}
   },
   "hashes": {
-    "world": "...",
+    "dynamics": "...",
     "rule_pools": "...",
     "vocab": "..."
   }

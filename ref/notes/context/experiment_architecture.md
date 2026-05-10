@@ -56,7 +56,7 @@ data/3d-dyadaxes
 ```
 
 Each dataset branch has a `manifest/` directory plus a dataset-local
-`prepare.py`. The reusable CA world, seed, rule, boundary, and rollout
+`prepare.py`. The reusable CA dynamics, seed, rule, boundary, and rollout
 mechanics live in `ankos/src/ca`.
 
 ### 2. Positional Encoder
@@ -362,7 +362,7 @@ delta_accuracy = transformed_accuracy - original_accuracy
 `ankos/src/ca` owns:
 
 ```text
-CA world specs
+CA dynamics
 coordinate/loci primitives
 alphabet, neighborhood, frontier, seed, rule, and boundary primitives
 deterministic RNG primitives

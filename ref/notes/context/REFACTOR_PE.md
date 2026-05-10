@@ -108,7 +108,7 @@ branch:
 - `eval_streams.json`
 
 These files record vocabulary information, stream definitions, rule pools,
-split metadata, CA world/source identity, and other structured assets needed by
+split metadata, CA dynamics/source identity, and other structured assets needed by
 dataset `prepare.py`, `data/datasets.py`, `components/tokenizer.py`, and
 `components/batch.py`.
 
