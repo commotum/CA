@@ -14,8 +14,8 @@ The construction hierarchy mirrors `neighborhoods.py` and `frontiers.py`:
   predicates rather than duplicating selector logic.
 
 This keeps seed support construction separate from alphabets, rules, rollout,
-tokenization, and dataset assembly. PE chooses which seed family is paired with
-each named dataset.
+representation, and source assembly. Callers choose which seed family is paired
+with each source.
 """
 
 from __future__ import annotations
@@ -141,7 +141,7 @@ def pair(x0: int, x1: int, fill_value: int = 0) -> Seed:
     """Build a two-value scalar history seed.
 
     This is the deterministic seed family for second-order 0D recurrences.
-    The renderer should place `x0` and `x1` according to the dataset's temporal
+    The renderer should place `x0` and `x1` according to the source's temporal
     history convention.
     """
 
@@ -161,7 +161,7 @@ def uniform_pair(value_count: int = 97, reject_zero_zero: bool = True) -> Seed:
     """Sample a two-value scalar history seed uniformly.
 
     `value_count` is the finite value count, usually the alphabet size for the
-    scalar recurrence dataset.
+    scalar recurrence source.
     """
 
     value_count = int(value_count)

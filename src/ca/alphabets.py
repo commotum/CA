@@ -2,15 +2,14 @@
 
 Treat this as a tentative plan, not a prescription.
 
-This module defines raw value spaces used by generated datasets. An alphabet is
-not a vocabulary and does not assign token ids. It only defines the values a
-trajectory cell, symbol, register, or field may contain before tokenization or
-numerical handling.
+This module defines raw value spaces used by generated trajectories. An
+alphabet is not a vocabulary and does not assign token ids. It only defines the
+values a trajectory cell, symbol, register, or field may contain before
+downstream representation or numerical handling.
 
-Token ids are assigned later by PE tokenization, which enumerates special
-tokens first and then adds the alphabets required by the selected dataset
-manifests. This keeps alphabet definitions reusable and prevents fixed global
-vocabulary constants from creeping into the CA layer.
+Any representation ids are assigned later by downstream code. This keeps
+alphabet definitions reusable and prevents fixed global vocabulary
+constants from creeping into the CA layer.
 
 Prefer parameterized alphabet families over named constants. Scalar numerical
 values use range alphabets, while binary cellular automata use the boolean
@@ -27,7 +26,7 @@ specification. The alphabet only needs to say which values are legal.
 
 Likewise, totalistic behavior, ordered-neighborhood behavior, blank/quiescent
 backgrounds, digit-base interpretation, tape-symbol roles, and head-state roles
-belong to rules, engines, encodings, or dataset metadata. They should not become
+belong to rules, engines, encodings, or system metadata. They should not become
 new primitive alphabet families unless they change the underlying value-space
 semantics.
 """
@@ -65,8 +64,8 @@ class IntegerSpace:
 
     This is for future number-based engines such as register machines, integer
     maps, arithmetic iterations, and recursive sequences. It is not directly a
-    finite token alphabet unless `upper` and `lower` make the range finite or a
-    tokenizer/discretizer explicitly bounds it.
+    finite alphabet unless `upper` and `lower` make the range finite or a
+    downstream representation layer explicitly bounds it.
     """
 
     lower: int | None = None
@@ -81,8 +80,8 @@ class RealInterval:
     """Continuous scalar interval value space.
 
     This is for future continuous cellular automata and iterated maps. It is not
-    directly tokenizable without a discretization, quantization, or regression
-    target policy in the tokenizer/model layer.
+    directly representable without a discretization, quantization, or
+    regression target policy in the downstream representation layer.
     """
 
     low: float = 0.0
@@ -179,9 +178,10 @@ def boolean() -> Alphabet:
     """Build the canonical two-state boolean alphabet.
 
     The raw values are still `0` and `1`, but the family records that these are
-    boolean off/on states rather than scalar numerical values. Tokenization can
-    therefore share boolean tokens across CA datasets without merging them with
-    numeric range alphabets that happen to contain the same integers.
+    boolean off/on states rather than scalar numerical values. Downstream
+    representation can therefore treat boolean states consistently without
+    merging them with numeric range alphabets that happen to contain the same
+    integers.
     """
 
     return Alphabet(
@@ -195,7 +195,7 @@ def symbolic(values: Sequence[Hashable]) -> Alphabet:
     """Build an alphabet from explicit symbolic values.
 
     This is reserved for non-numeric or semantically named cell states. Values
-    should remain finite, deterministic, and directly tokenizable.
+    should remain finite, deterministic, and directly representable.
     """
 
     values = tuple(values)
@@ -255,8 +255,8 @@ def integer_space(lower: int | None = 0, upper: int | None = None) -> IntegerSpa
 
     This covers register values, integer maps, arithmetic iterations, and
     integer recursive sequences. Unbounded integer spaces are value spaces, not
-    finite alphabets. A tokenizer must either reject them, bound them, or use a
-    separate numeric representation policy.
+    finite alphabets. A downstream representation layer must either reject
+    them, bound them, or use a separate numeric representation policy.
     """
 
     _not_implemented()
@@ -267,7 +267,7 @@ def real_interval(low: float = 0.0, high: float = 1.0, closed: bool = True) -> R
 
     This covers continuous cellular automata and iterated maps whose state value
     is a real scalar, usually in `[0, 1]`. It requires a downstream numerical or
-    discretization policy before it can participate in tokenized training.
+    discretization policy before it can participate in downstream training.
     """
 
     _not_implemented()

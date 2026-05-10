@@ -15,9 +15,9 @@ The construction hierarchy mirrors `neighborhoods.py`:
   duplicating component logic.
 
 This keeps spatial construction in neighborhoods/frontiers, value-space
-construction in alphabets, and rollout mechanics in `rollout.py`. PE chooses
-the alphabet, neighborhood, frontier, seed, boundary, shape, horizon, and named
-rule family.
+construction in alphabets, and rollout mechanics in `rollout.py`. Callers
+choose the alphabet, neighborhood, frontier, seed, boundary, shape, horizon,
+and named rule family.
 """
 
 from __future__ import annotations

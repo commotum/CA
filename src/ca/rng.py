@@ -1,8 +1,8 @@
 """Deterministic RNG helpers for CA episode generation.
 
-This module owns seed derivation mechanics only. PE still decides which stream,
-rule pool, split, or eval row is being realized; `ca.rng` turns those already
-chosen stream seeds into stable NumPy generators.
+This module owns seed derivation mechanics only. Callers still decide which
+stream, rule pool, split, or evaluation row is being realized; `ca.rng` turns
+already chosen seed inputs into stable NumPy generators.
 """
 
 from __future__ import annotations
@@ -18,10 +18,7 @@ SPLITMIX64_GAMMA = 0x9E3779B97F4A7C15
 
 
 def splitmix64(base_rng: int, episode_index: int = 0) -> int:
-    """Derive a stable unsigned 64-bit seed from a base seed and index.
-
-    This preserves the old PE runtime derivation from `old/data/batch.py`.
-    """
+    """Derive a stable unsigned 64-bit seed from a base seed and index."""
 
     value = (int(base_rng) + int(episode_index) + SPLITMIX64_GAMMA) & UINT64_MASK
     value = (value ^ (value >> 30)) * 0xBF58476D1CE4E5B9 & UINT64_MASK
@@ -32,7 +29,7 @@ def splitmix64(base_rng: int, episode_index: int = 0) -> int:
 def derive_episode_rng(seed_stream: Mapping[str, Any] | int, episode_index: int) -> int:
     """Return the deterministic seed for one episode.
 
-    Mapping inputs follow the PE stream schema:
+    Mapping inputs follow the compact stream seed schema:
 
     ```text
     {"policy": "splitmix64", "base_rng": ...}

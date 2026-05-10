@@ -12,8 +12,8 @@ The public entry point accepts only the handoff contract inputs:
 
 Outputs are raw native-dimensional trajectories plus optional canonical
 `[t, x, y, z]` coordinates. This module does not choose train/eval splits,
-sample streams, render seed specs, tokenize, pad, create labels, build batches,
-write manifests, or manage device policy.
+sample streams, render seed specs, serialize representations, pad, create
+labels, build batches, write manifests, or manage device policy.
 """
 
 from __future__ import annotations
@@ -95,7 +95,7 @@ def _rollout_states(
     boundary: Mapping[str, Any],
     steps: int,
 ) -> np.ndarray:
-    """Roll native states forward without tokenization or batch construction."""
+    """Roll native states forward without representation or batch construction."""
 
     _ensure_time_slice(frontier)
 
@@ -188,7 +188,7 @@ def _rollout_ar2(initial_state: Any, rule: rules.Rule, steps: int) -> np.ndarray
 
     The seed pair is interpreted as hidden previous value and first serialized
     value: `(x[-1], x[0])`. Returned states start at `x[0]`, so every serialized
-    source token has a rule-generated next-state target.
+    source value has a rule-generated next-state target.
     """
 
     seed = np.asarray(initial_state, dtype=np.int64).reshape(-1)

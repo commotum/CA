@@ -19,7 +19,7 @@ class Dynamics:
     """Reusable CA mechanics needed to evolve raw states.
 
     `Dynamics` deliberately excludes per-episode inputs such as `rule_id`,
-    `seed_state`, and `steps`; PE passes those separately for each stream row.
+    `seed_state`, and `steps`; callers pass those separately for each episode.
     """
 
     domain: str
@@ -51,7 +51,7 @@ class Dynamics:
 
 @dataclass(frozen=True)
 class RawEpisode:
-    """Raw generated episode before PE tokenization or batching."""
+    """Raw generated episode before downstream representation or batching."""
 
     domain: str
     shape: tuple[int, ...]

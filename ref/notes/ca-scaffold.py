@@ -40,12 +40,12 @@ Implementation style once a stub is ready:
 For pipeline modules, use the same ownership-first shape:
 
 - `ca.rollout` rolls one already chosen seed state forward from `Dynamics`.
-- PE preparation freezes deterministic source manifests, stream specs, and
-  vocab recipes.
-- PE tokenization serializes realized episodes, including token times,
-  coordinates, next-state targets, and mask metadata.
-- PE batching realizes train/eval streams, filters rollouts at runtime, and
-  builds tensors, including dense state-causal attention masks.
+- Source preparation freezes deterministic manifests, stream specs, and
+  representation recipes.
+- Downstream representation serializes realized episodes, including times,
+  coordinates, targets, and selection metadata.
+- Batching realizes streams, filters rollouts at runtime, and builds tensors or
+  arrays for consumers.
 
 Those modules should start with a big-picture docstring, define a small public
 stub surface below it, and leave compatibility or migrated legacy code clearly
@@ -109,8 +109,8 @@ def singular_primitive(value: int = 0) -> Component:
 
     Singular primitives should be built directly from the lower-level module
     this catalog depends on. For example, `neighborhoods.py` builds singular
-    read loci from `loci.py`; it does not ask PE dataset code or `rollout.py`
-    to help.
+    read loci from `loci.py`; it does not ask source assembly code or
+    `rollout.py` to help.
 
     Implementation checklist:
 
