@@ -2,7 +2,8 @@
 
 from . import alphabets, boundary, frontiers, loci, neighborhoods, rng, rules, seeds
 from .rollout import apply_boundary_read, apply_rule, canonical_coords, generate_episode, rollout
-from .specs import Dynamics, RawEpisode
+from .rules import rule_count, valid_rule_ids
+from .specs import Dynamics, RawEpisode, dynamics_from_spec
 
 __all__ = [
     "Dynamics",
@@ -18,6 +19,9 @@ __all__ = [
     "neighborhoods",
     "rng",
     "rollout",
+    "rule_count",
     "rules",
     "seeds",
+    "valid_rule_ids",
+    "dynamics_from_spec",
 ]

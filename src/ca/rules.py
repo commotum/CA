@@ -129,6 +129,21 @@ def instantiate(rule: Rule, rule_id: int) -> Rule:
     )
 
 
+def rule_count(rule: Rule) -> int:
+    """Return the number of valid concrete rule ids for a finite rule family."""
+
+    metadata = dict(rule.metadata or {})
+    if "R" not in metadata:
+        raise ValueError(f"rule family {rule.family!r} does not declare a finite rule count")
+    return int(metadata["R"])
+
+
+def valid_rule_ids(rule: Rule) -> range:
+    """Return the valid concrete rule-id range for a finite rule family."""
+
+    return range(rule_count(rule))
+
+
 def validate(a: int, *S_i: int) -> dict[str, int]:
     """Return basic finite-rule counts from already-known channel sizes.
 

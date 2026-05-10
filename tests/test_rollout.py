@@ -65,6 +65,64 @@ def test_spatial_lookup_rule_zero_outputs_zero_state() -> None:
     assert episode.coords.shape == (6, 4)
 
 
+def test_2d_rollout_returns_raw_episode() -> None:
+    dynamics = ca.Dynamics(
+        domain="t+2d",
+        shape=(3, 3),
+        rule=rules.dyadaxes_2d(),
+        neighborhoods=(neighborhoods.dyadaxes_2d(),),
+        frontier=frontiers.full_next_slice((3, 3)),
+        boundary={"policy": "fixed", "value": 0},
+    )
+
+    episode = ca.rollout(
+        dynamics=dynamics,
+        rule_id=0,
+        seed_state=np.array(
+            [
+                [0, 1, 0],
+                [1, 1, 1],
+                [0, 1, 0],
+            ]
+        ),
+        steps=2,
+    )
+
+    assert episode.states.shape == (2, 3, 3)
+    assert episode.states[1].tolist() == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+    assert episode.coords is not None
+    assert episode.coords.shape == (18, 4)
+
+
+def test_3d_rollout_returns_raw_episode() -> None:
+    dynamics = ca.Dynamics(
+        domain="t+3d",
+        shape=(3, 3, 3),
+        rule=rules.dyadaxes_3d(),
+        neighborhoods=(neighborhoods.dyadaxes_3d(),),
+        frontier=frontiers.full_next_slice((3, 3, 3)),
+        boundary={"policy": "fixed", "value": 0},
+    )
+    seed_state = np.zeros((3, 3, 3), dtype=np.int64)
+    seed_state[1, 1, 1] = 1
+
+    episode = ca.rollout(
+        dynamics=dynamics,
+        rule_id=0,
+        seed_state=seed_state,
+        steps=2,
+    )
+
+    assert episode.states.shape == (2, 3, 3, 3)
+    assert np.count_nonzero(episode.states[1]) == 0
+    assert episode.coords is not None
+    assert episode.coords.shape == (54, 4)
+
+
 def test_rollout_can_skip_coord_materialization() -> None:
     dynamics = ca.Dynamics(
         domain="t+0d",
