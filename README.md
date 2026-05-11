@@ -1,56 +1,35 @@
 # ankos
 
-`ankos` (*A New Kind of Science*) is a Python project for exploring cellular 
-automata and other simple programs in the spirit of *A New Kind of Science*. 
-ANKoS stands for "A New Kind of Science"; the import package is `ca`.
+ANKoS ("A New Kind of Science") is a Python project for running
+cellular-automaton experiments inspired by Wolfram's book. Import it as `ca`.
 
-The goal is a unified interface for building the cellular-automaton families
-that appear throughout Wolfram's book. Different systems may vary by dimension,
-geometry, alphabet, neighborhood, rule form, update schedule, boundary, and
-initial condition; ANKoS keeps those choices inside one set of concepts.
-
-The current package implements the fixed-grid trajectory core for reproducible
-experiments: choose a rule, choose an initial condition, run the system, and
-study the trajectory that appears. Simple programs can settle into repetition,
-form nested structure, generate apparent randomness, or support localized
-interactions.
-
-## Project Layout
+The aim is one construction API for many CA families: elementary, multi-color,
+totalistic, two-dimensional, three-dimensional, and continuous. These systems
+vary by dimension, geometry, alphabet, neighborhood, rule form, update schedule,
+boundary, and seed, but share a common spine:
 
 ```text
-ankos
-|-- src/ca                         Python package
-|-- tests                          package tests
-|-- ref/A-New-Kind-of-Science       book source and ANKoS atlas
-|-- ref/notes/CA-Types.md           construction taxonomy
-|-- ref/notes/generator.md          trajectory generator schema
-|-- pyproject.toml
-`-- README.md
+domain:        the active time and spatial dimensions
+shape:         the finite extent of the run
+alphabet:      the values a site can hold
+seed:          the initial state
+boundary:      how out-of-bounds reads behave
+frontier:      which sites update
+neighborhood:  what each update site reads
+rule:          how reads become the next state
 ```
 
-The atlas at `ref/A-New-Kind-of-Science/ANKoS-Atlas.md` summarizes the book's
-arc: complexity from simple rules, behavior classes, randomness generation,
-self-organization, universality, computational irreducibility, and simple
-programs as explanatory models.
+The package implements fixed-grid trajectory generation.
 
-`ref/notes/CA-Types.md` indexes the construction types behind those examples:
-elementary, multi-color, totalistic, higher-dimensional, continuous, and nearby
-simple-program systems. It separates construction choices from the behavior
-that later emerges.
+## Model
 
-The generator schema at `ref/notes/generator.md` defines the coordinate and
-update model used by the package.
-
-## Trajectory Model
-
-A generated episode is a full-state trajectory over canonical coordinates:
+An episode is a full-state trajectory over canonical coordinates:
 
 ```text
 [t, x, y, z]
 ```
 
-The same coordinate form covers scalar, one-dimensional, two-dimensional, and
-three-dimensional systems:
+The same address covers scalar through three-dimensional systems:
 
 ```text
 t+0D: [t, 0, 0, 0]
@@ -59,42 +38,18 @@ t+2D: [t, x, y, 0]
 t+3D: [t, x, y, z]
 ```
 
-ANKoS uses the Wolfram next-state indexing convention. The state at time `t` is
-present in the trajectory. Neighborhoods read from that source state, and the
-rule writes the corresponding state at `t + 1`:
+ANKoS follows Wolfram's next-state convention: state `t` is present in the
+trajectory; the rule reads it and writes `t + 1`.
 
 ```text
-present state t -> predicted state t + 1
+state t -> state t + 1
 ```
 
-At each update time, a frontier selects update sites in the current state.
-Neighborhoods read relative offsets around each selected site. A rule maps
-those reads to the value written at the corresponding next-time coordinate.
-Temporal recurrences can also read earlier source times such as `t - 1`.
+At each update time, a frontier selects current-state sites, neighborhoods read
+relative offsets around those sites, and a rule writes next-state values.
+Temporal recurrences may also read earlier source times such as `t - 1`.
 
-The reusable pieces are the same across CA families:
-
-```text
-domain + shape + alphabet + seed + boundary + neighborhood + frontier + rule
-```
-
-## The `ca` Package
-
-```text
-src/ca
-|-- loci.py            canonical coordinates, selectors, masks, and gathering
-|-- alphabets.py       finite value spaces
-|-- seeds.py           initial-state seed families and rendering
-|-- neighborhoods.py   read stencils built from selectors
-|-- frontiers.py       update-site frontiers
-|-- rules.py           rule channels and named rule families
-|-- rollout.py         NumPy trajectory rollout
-|-- specs.py           manifest loading and result dataclasses
-|-- rng.py             reproducible NumPy RNG helpers
-`-- __init__.py        public exports
-```
-
-The usual Python flow is:
+## API
 
 ```text
 ca.Dynamics + rule_id + seed_state + steps
@@ -102,22 +57,37 @@ ca.Dynamics + rule_id + seed_state + steps
     -> ca.RawEpisode
 ```
 
-`ca.Dynamics` describes the reusable system:
+`ca.Dynamics` describes the system:
 
 - `domain`: `t+0d`, `t+1d`, `t+2d`, or `t+3d`
 - `shape`: native spatial shape
-- `rule`: a rule family
-- `neighborhoods`: read stencils for the rule
-- `frontier`: an update-site frontier
+- `rule`: rule family
+- `neighborhoods`: read stencils
+- `frontier`: update-site selector
 - `boundary`: spatial read behavior
-- `metadata`: optional metadata copied into the result
+- `metadata`: optional result metadata
 
-`ca.RawEpisode` contains the raw NumPy `states`, optional flattened
-coordinates, and the episode metadata.
+`ca.RawEpisode` returns `states`, coordinates, and episode metadata.
+
+Package modules:
+
+```text
+src/ca
+|-- loci.py            coordinates, selectors, masks, gathering
+|-- alphabets.py       finite value spaces
+|-- seeds.py           seed specs and rendering
+|-- neighborhoods.py   read stencils
+|-- frontiers.py       update-site selectors
+|-- rules.py           rule channels and families
+|-- rollout.py         NumPy rollout
+|-- specs.py           manifests and result types
+|-- rng.py             reproducible RNG helpers
+`-- __init__.py        public exports
+```
 
 ## Quick Start
 
-Install dependencies from the repository root:
+Install dependencies:
 
 ```bash
 uv sync
@@ -175,7 +145,6 @@ seed_state = np.array(
 )
 
 episode = ca.rollout(dynamics, rule_id=0, seed_state=seed_state, steps=2)
-
 print(episode.states.shape)
 # (2, 3, 3)
 ```
@@ -188,8 +157,6 @@ import numpy as np
 import ca
 
 manifest = {
-    "dataset_id": "2d-dyadaxes",
-    "manifest_version": "v1",
     "domain": "t+2d",
     "shape": [3, 3],
     "dynamics": {
@@ -205,16 +172,16 @@ seed_state = np.ones((3, 3), dtype=np.int64)
 episode = ca.rollout(dynamics, rule_id=0, seed_state=seed_state, steps=2)
 ```
 
-## Coordinates And Shapes
+## Coordinates
 
-Spatial axes are centered by default. For example:
+Spatial axes are centered:
 
 ```text
 shape (3,) -> x = -1, 0, 1
 shape (4,) -> x = -1, 0, 1, 2
 ```
 
-Native state arrays keep their natural rank:
+State arrays keep native rank:
 
 ```text
 t+0d: (steps,)
@@ -223,35 +190,30 @@ t+2d: (steps, x, y)
 t+3d: (steps, x, y, z)
 ```
 
-Use `ca.canonical_coords(domain, shape, steps)` to create the flattened
-`[t, x, y, z]` table for an episode.
+Use `ca.canonical_coords(domain, shape, steps)` for the flattened
+`[t, x, y, z]` table.
 
-## Built-In Families
+## Built-Ins
 
 Rules:
 
-- `ar2_modular_0d`: second-order modular scalar recurrence
-- `dyadrads_1d`: binary lookup over self, radius-1 activity, and radius-2
-  activity
-- `dyadaxes_2d`: binary lookup over self, cardinal-neighbor majority, and
-  diagonal-neighbor majority
-- `dyadaxes_3d`: binary lookup over self, face-neighbor majority, and
-  edge/corner activity
+- `ar2_modular_0d`
+- `dyadrads_1d`
+- `dyadaxes_2d`
+- `dyadaxes_3d`
 
 Neighborhoods:
 
-- Basic stencils: `self_at`, `literal_offsets`, `metric_radius`, `shell`,
-  `axis_shell`, `l1_shell`, `change_count_shell`, `directional_line`,
-  `directional_fov`
-- Common CA aliases: `eca`, `moore`, `von_neumann`, `history`
-- Compounds: `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`
+- `self_at`, `literal_offsets`, `metric_radius`, `shell`, `axis_shell`
+- `l1_shell`, `change_count_shell`, `directional_line`, `directional_fov`
+- `eca`, `moore`, `von_neumann`, `history`
+- `ar2_0d`, `dyadrads_1d`, `dyadaxes_2d`, `dyadaxes_3d`
 
 Seeds:
 
-- Scalar and simple seeds: `pair`, `uniform_pair`, `constant`, `point`,
-  `bernoulli`, `selector_seed`
-- Structured supports: `subspace`, `finite_segment`, `body`, `compound`,
-  `region`, `periodic`, `path`, `transform`, `structured`
+- `pair`, `uniform_pair`, `constant`, `point`, `bernoulli`, `selector_seed`
+- `subspace`, `finite_segment`, `body`, `compound`, `region`, `periodic`
+- `path`, `transform`, `structured`
 
 Alphabets:
 
@@ -282,9 +244,15 @@ seed_state = ca.render(ca.bernoulli(p_low=0.5, p_high=0.5), shape=(16,), rng=rng
 
 Pass the rendered `seed_state` to `ca.rollout(...)`.
 
-## Development
+## References
 
-Run tests:
+```text
+ref/A-New-Kind-of-Science/ANKoS-Atlas.md  book atlas and chapter map
+ref/notes/CA-Types.md                     construction taxonomy
+ref/notes/generator.md                    trajectory generator schema
+```
+
+## Development
 
 ```bash
 uv run pytest
