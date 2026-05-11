@@ -139,3 +139,112 @@ calls and a public batch result shape that PE can consume directly.
   So yes: the prompt is aligned, but the real win needs a PE-side batch
   planner. ANKoS should expose raw batch kernels; PE should choose rows, RNGs,
   seed recipes, grouping, tokenization, collation, and device movement.
+
+
+# Seed Count
+
+• It depends on shape and whether exact dedupe is enabled.
+
+  With the current default ca.seeds.structured(shape) settings:
+
+  0D shape ()          -> 2
+  1D shape (123,)      -> 492
+  2D shape (11, 11)    -> 402
+  3D shape (5, 5, 5)   -> 502
+
+  Raw before dedupe:
+
+  (123,)      -> 1848 raw, 492 deduped
+  (11, 11)   -> 508 raw, 402 deduped
+  (5, 5, 5)  -> 560 raw, 502 deduped
+
+  So for our PE target structured spatial datasets, it is hundreds of seed specs per
+  shape, not a tiny fixed catalog.
+
+───────────────────────────────────────────────────────────────────────────────────────
+
+
+› for all three together deduped?
+
+
+• For the three spatial PE target shapes together, deduped:
+
+  1D (123,)      492
+  2D (11, 11)   402
+  3D (5, 5, 5)  502
+  Total        1396
+
+  So 1,396 structured seed specs total across those three target branches.
+
+
+› and with 1396 seeds, and 3 domains and 256 rules per domain, how many total episodes
+  is that?
+
+
+• 1,396 seeds * 3 domains * 256 rules = 1,072,128 episodes.
+
+  So just over 1.07 million episodes.
+
+
+# Parameter Count
+
+• With depth = 4, the model shape is:
+
+  n_layer = 4
+  n_embd = 384
+  n_head = 4
+  n_kv_head = 4
+  head_dim = 96
+  sequence_len = 2048
+
+  Parameter count depends slightly on vocab size:
+
+  t0d vocab 103      -> 7,236,360 params
+  t1d/t2d/t3d vocab 8 -> 7,090,440 params
+  multi vocab 105    -> 7,239,432 params
+
+  So for the full multi-domain model at depth 4: 7.24M parameters.
+
+
+# Episode Count
+
+  The token-window part aligns:
+
+  t+0D: 2046 loss tokens
+  t+1D: 16 * 123 = 1968
+  t+2D: 16 * 121 = 1936
+  t+3D: 16 * 125 = 2000
+  multi round: 2046 + 1968 + 1936 + 2000 = 7950
+
+  But the episode counts are stale relative to current code/model params.
+
+  Current code gives:
+
+  t0d   params 7,236,360 -> 86,836,320 tokens -> 42,442 episodes
+  t1d   params 7,090,440 -> 85,085,280 tokens -> 43,235 episodes
+  t2d   params 7,090,440 -> 85,085,280 tokens -> 43,950 episodes
+  t3d   params 7,090,440 -> 85,085,280 tokens -> 42,543 episodes
+  multi params 7,239,432 -> 86,873,184 tokens
+
+  Also important: current code does not actually split the multi budget across the four
+  dataset families. It currently prepares each branch with its own full branch budget,
+  so exhausting all four multi streams would be about:
+
+  342,096,012 loss tokens
+  172,170 episodes total
+
+  If we want the multi config to split its 86,873,184 target tokens across the four
+  domains, then the rough split should be:
+
+  t0d: 10,616 episodes
+  t1d: 11,036 episodes
+  t2d: 11,219 episodes
+  t3d: 10,860 episodes
+
+  Or as mixed four-domain rounds:
+
+  86,873,184 / 7,950 = 10,928 mixed rounds
+  = 43,712 individual episodes
+
+  So your table is conceptually right on the window math, but not aligned with the
+  current implementation for target episode counts or multi-budget splitting.
