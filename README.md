@@ -1,13 +1,19 @@
 # ankos
 
-`ankos` is a Python project for exploring cellular automata and other simple
-programs in the spirit of *A New Kind of Science*. The import package is `ca`.
+`ankos` (*A New Kind of Science*) is a Python project for exploring cellular 
+automata and other simple programs in the spirit of *A New Kind of Science*. 
+ANKoS stands for "A New Kind of Science"; the import package is `ca`.
 
-The central idea is direct experimentation: choose a simple rule, choose an
-initial condition, run the system, and study the trajectory that appears.
-Simple programs can settle into repetition, form nested structure, generate
-apparent randomness, or support localized interactions. `ankos` provides the
-small trajectory generator needed to run those experiments reproducibly.
+The goal is a unified interface for building the cellular-automaton families
+that appear throughout Wolfram's book. Different systems may vary by dimension,
+geometry, alphabet, neighborhood, rule form, update schedule, boundary, and
+initial condition; ANKoS keeps those choices inside one set of concepts.
+
+The current package implements the fixed-grid trajectory core for reproducible
+experiments: choose a rule, choose an initial condition, run the system, and
+study the trajectory that appears. Simple programs can settle into repetition,
+form nested structure, generate apparent randomness, or support localized
+interactions.
 
 ## Project Layout
 
@@ -16,6 +22,7 @@ ankos
 |-- src/ca                         Python package
 |-- tests                          package tests
 |-- ref/A-New-Kind-of-Science       book source and ANKoS atlas
+|-- ref/notes/CA-Types.md           construction taxonomy
 |-- ref/notes/generator.md          trajectory generator schema
 |-- pyproject.toml
 `-- README.md
@@ -25,6 +32,11 @@ The atlas at `ref/A-New-Kind-of-Science/ANKoS-Atlas.md` summarizes the book's
 arc: complexity from simple rules, behavior classes, randomness generation,
 self-organization, universality, computational irreducibility, and simple
 programs as explanatory models.
+
+`ref/notes/CA-Types.md` indexes the construction types behind those examples:
+elementary, multi-color, totalistic, higher-dimensional, continuous, and nearby
+simple-program systems. It separates construction choices from the behavior
+that later emerges.
 
 The generator schema at `ref/notes/generator.md` defines the coordinate and
 update model used by the package.
@@ -47,18 +59,24 @@ t+2D: [t, x, y, 0]
 t+3D: [t, x, y, z]
 ```
 
+ANKoS uses the Wolfram next-state indexing convention. The state at time `t` is
+present in the trajectory. Neighborhoods read from that source state, and the
+rule writes the corresponding state at `t + 1`:
+
+```text
+present state t -> predicted state t + 1
+```
+
 At each update time, a frontier selects update sites in the current state.
 Neighborhoods read relative offsets around each selected site. A rule maps
 those reads to the value written at the corresponding next-time coordinate.
+Temporal recurrences can also read earlier source times such as `t - 1`.
 
-For ordinary cellular automata, neighborhoods read the current state and write
-the next one:
+The reusable pieces are the same across CA families:
 
 ```text
-state at t -> state at t + 1
+domain + shape + alphabet + seed + boundary + neighborhood + frontier + rule
 ```
-
-Temporal recurrences can also read earlier source times such as `t - 1`.
 
 ## The `ca` Package
 
