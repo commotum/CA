@@ -9,13 +9,13 @@ vary by dimension, geometry, alphabet, neighborhood, rule form, update schedule,
 boundary, and seed, but share a common spine:
 
 ```text
-domain:        the active time and spatial dimensions
+domain:        the spacetime dimension of the automaton
 shape:         the finite extent of the run
-alphabet:      the values a site can hold
+alphabet:      the possible cell states
 seed:          the initial state
-boundary:      how out-of-bounds reads behave
-frontier:      which sites update
-neighborhood:  what each update site reads
+boundary:      the edge convention for neighborhood reads
+frontier:      the cells updated at the next step
+neighborhood:  what each active cell reads
 rule:          how reads become the next state
 ```
 
