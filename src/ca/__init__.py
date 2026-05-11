@@ -10,19 +10,20 @@ from .neighborhoods import dyadrads_1d as dyadrads_1d_neighborhood
 from .neighborhoods import dyadaxes_2d as dyadaxes_2d_neighborhood
 from .neighborhoods import dyadaxes_3d as dyadaxes_3d_neighborhood
 from .rng import derive_episode_rng, numpy_rng, splitmix64
-from .rollout import apply_rule, canonical_coords, rollout
+from .rollout import apply_rule, canonical_coords, rollout, rollout_batch
 from .rules import Rule, RuleChannel, ar2_modular_0d, instantiate, rule_count, valid_rule_ids
 from .rules import dyadrads_1d as dyadrads_1d_rule
 from .rules import dyadaxes_2d as dyadaxes_2d_rule
 from .rules import dyadaxes_3d as dyadaxes_3d_rule
 from .seeds import Seed, bernoulli, constant, pair, point, render, selector_seed, uniform_pair
-from .specs import Dynamics, RawEpisode, dynamics_from_spec
+from .specs import Dynamics, RawBatch, RawEpisode, dynamics_from_spec
 
 __all__ = [
     "Alphabet",
     "Dynamics",
     "Frontier",
     "Neighborhood",
+    "RawBatch",
     "RawEpisode",
     "Rule",
     "RuleChannel",
@@ -65,6 +66,7 @@ __all__ = [
     "render",
     "rng",
     "rollout",
+    "rollout_batch",
     "rule_count",
     "rules",
     "selector_seed",

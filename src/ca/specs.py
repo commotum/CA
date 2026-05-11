@@ -68,6 +68,19 @@ class RawEpisode:
     metadata: Mapping[str, Any] | None = None
 
 
+@dataclass(frozen=True)
+class RawBatch:
+    """Raw generated episodes sharing one dynamics object."""
+
+    domain: str
+    shape: tuple[int, ...]
+    rule_ids: np.ndarray
+    steps: int
+    states: np.ndarray
+    coords: np.ndarray | None = None
+    metadata: Mapping[str, Any] | None = None
+
+
 def dynamics_from_spec(spec: Mapping[str, Any]) -> Dynamics:
     """Build runtime `Dynamics` from a JSON-safe manifest-style mapping."""
 
@@ -233,6 +246,7 @@ def _normalize_boundary(boundary: Mapping[str, Any] | None = None) -> dict[str, 
 
 __all__ = [
     "Dynamics",
+    "RawBatch",
     "RawEpisode",
     "dynamics_from_spec",
     "frontier_from_spec",
